@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 24% 12%;
+  --muted: 220 20% 97%;
+  --muted-foreground: 220 10% 45%;
+  --border: 220 14% 90%;
+  --primary: 222 50% 14%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 216 36% 95%;
+  --accent-foreground: 222 40% 20%;
+  --font-sans: "Inter";
+  --font-display: "Inter";
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight;
+  }
+}

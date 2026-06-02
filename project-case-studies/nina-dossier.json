@@ -1,0 +1,335 @@
+{
+  "project": "NINA",
+  "artifact": "raw_engineering_intelligence",
+  "status": "complete_question_set_answered",
+  "source_basis": {
+    "code_read": true,
+    "docs_read": true,
+    "tests_read": true,
+    "notes": [
+      "Answers are grounded in repository code and docs where visible.",
+      "Unknowns are explicitly marked with [CLARIFY: ...].",
+      "This is not a case study narrative; it is structured extraction material."
+    ]
+  },
+  "sections": {
+    "1_executive_summary": {
+      "what_is_the_project": "NINA is a production-oriented voice navigation platform that lets websites add safe, context-aware voice control through an embeddable SDK, a deterministic FastAPI decision engine, and a generated per-site agent.json contract.",
+      "what_problem_does_it_solve": "It bridges natural voice commands to reliable website execution by converting speech into typed instructions (navigate/search/click/needs_login/no_match) rather than brittle free-form browser automation.",
+      "who_uses_it": "Primary users are website teams integrating voice navigation and end users interacting hands-free through the Nina widget on integrated sites.",
+      "why_does_it_matter": "It matters because most voice web automation breaks in production due to selector drift, auth gates, and ambiguous intent; NINA adds deterministic resolution and safety controls to make voice interactions operationally viable.",
+      "what_makes_it_unique": "It combines one LLM parse step with deterministic contract-based execution, plus runtime selector failure reporting and structured recovery/healing pathways.",
+      "final_outcome": "A working three-package system (generator, API, SDK) with evaluators/tests, deployable infrastructure patterns, and reusable onboarding flow for site-level voice enablement."
+    },
+    "2_problem_discovery": {
+      "pain_point": "There was no scalable, safe, reusable method to execute natural voice commands across arbitrary websites, especially across auth and dynamic UI changes.",
+      "existing_solutions_evaluated": [
+        "Ad hoc per-site voice logic",
+        "Generic browser voice/automation approaches",
+        "LLM-heavy direct DOM control without deterministic site contract"
+      ],
+      "why_insufficient": "These were either brittle at runtime, unsafe for production, difficult to scale across sites, or weak at deterministic reproducibility.",
+      "core_insight": "Constrain LLM to intent extraction and move action execution to deterministic resolver + guardrails against a validated per-site contract (agent.json).",
+      "constraints": [
+        "Low-latency UX requirements",
+        "Per-site variability in pages/actions",
+        "Selector drift in real frontends",
+        "Credential safety requirements",
+        "Minimal integration friction (script tag model)",
+        "Need for graceful degraded modes without full infra"
+      ]
+    },
+    "3_product_vision": {
+      "original_vision": "Universal voice navigation for websites via simple SDK embed and generated site map.",
+      "vision_changes": "Expanded from simple command routing to production-oriented page-aware/session-aware orchestration with explicit recovery, guardrails, and planner capabilities.",
+      "assumptions_wrong": [
+        "Single-shot parsing plus static selectors would be enough in production",
+        "Basic context without explicit page/session modeling would remain reliable"
+      ],
+      "assumptions_correct": [
+        "LLM parse + deterministic execution split improves safety and explainability",
+        "Typed instruction contracts are superior to free-form tool outputs for browser execution"
+      ]
+    },
+    "4_system_architecture": {
+      "high_level_architecture": "Three layers: nina-generator (offline site intelligence generation), nina-api (runtime intent-to-instruction control plane), nina-sdk (browser voice capture and DOM execution plane).",
+      "major_services": [
+        "FastAPI backend service",
+        "Generator CLI/pipeline service",
+        "In-browser SDK runtime"
+      ],
+      "major_components": [
+        "Parser (LLM intent extraction)",
+        "Resolver (deterministic mapping)",
+        "Guardrails (safety/risk/confidence checks)",
+        "Session state and task planner",
+        "Error recovery and healer modules",
+        "Database/cache infrastructure adapters",
+        "SDK modules: voice/api/executor/queue/widget/auth"
+      ],
+      "data_flow": "Speech -> transcript -> API query payload with page/session context -> parse -> resolve -> guardrail/auth gate -> typed instruction -> SDK execution -> optional selector failure report -> recovery instruction -> async analytics logging.",
+      "control_flow": "Policy-first: validate/rate-limit/load-site -> parse intent -> deterministic resolve -> safety checks -> auth gate -> return instruction; on execution failure branch to recovery matrix.",
+      "request_lifecycle": "SDK sends QueryRequest, API performs checks and context assembly, parser returns intent, resolver maps instruction, guardrails decide allow/block, response returned, SDK executes, logs written async.",
+      "state_management": {
+        "browser_state": "Widget state + sessionStorage queue + session ID",
+        "backend_state": "SessionState semantic memory + action log + observation history",
+        "persistent_state": "Supabase sites and query logs"
+      },
+      "storage_strategy": "Supabase as source of truth for site metadata/config and query telemetry; generated agent manifests created offline and uploaded.",
+      "caching_strategy": "Redis-backed key TTL caches with in-memory fallback (agent config, rate counters, session/cache keys).",
+      "authentication_strategy": "Site API key issuance (one-time plaintext display), hash-at-rest lookup, runtime auth gating via requires_auth/needs_login flow.",
+      "deployment_architecture": "Containerized FastAPI behind Nginx TLS reverse proxy; env-configured external services (Groq, Supabase, optional Redis); SDK built and served separately.",
+      "architecture_diagrams": [
+        "User -> SDK (voice + page context) -> POST /api/v1/query -> API pipeline (security -> cache/db -> parser -> resolver -> guardrails -> auth gate) -> typed instruction -> SDK executor",
+        "SDK selector failure -> POST /api/v1/report-broken-selector -> recovery classifier/matrix -> recovery instruction -> SDK",
+        "Generator inputs (URL/docs/sitemap/manifest) -> parser/crawler/intent-gen/assembler/validator -> agent.json -> sites API upload"
+      ]
+    },
+    "5_agent_architecture": {
+      "uses_agents": true,
+      "agent_count_model": "Single constrained decision agent pattern with orchestrated submodules (not multi-agent framework).",
+      "agent_responsibilities": {
+        "parser_agent_role": "Interpret user intent into structured schema",
+        "deterministic_roles": [
+          "Resolver selects allowed action",
+          "Guardrails approve/block",
+          "Planner decomposes multi-step intents",
+          "Recovery handles runtime failures"
+        ]
+      },
+      "agent_communication": "Typed in-process handoffs and HTTP JSON contracts between SDK and backend.",
+      "handoffs": "IntentResult -> ResolvedIntent -> QueryResponse -> SDK executor; SelectorFailureReport -> recovery response.",
+      "exchanged_data_structures": [
+        "QueryRequest",
+        "QueryResponse",
+        "IntentResult",
+        "ResolvedIntent",
+        "SessionState",
+        "ActionLogEntry",
+        "Task/SubTask/ThoughtStep",
+        "SelectorFailureReport"
+      ],
+      "failure_handling": "Parser fallback to unknown, guardrail block to no_match, recovery matrix for selector/runtime issues, queue/auth replay for gated actions.",
+      "retry_handling": "Bounded retries in SDK API client and recovery logic; hard abort for non-retry-safe failures.",
+      "confidence_scoring": "Model-provided intent confidence gated by rule thresholds; separate healer confidence controls auto-commit vs review.",
+      "drift_prevention": "Deterministic agent.json-constrained resolution plus semantic/risk checks before execution.",
+      "infinite_loop_prevention": "Iteration caps, stagnation detection, retry ceilings, queue depth/TTL limits, and explicit abort paths."
+    },
+    "6_technical_decisions": {
+      "hardest_decisions": [
+        "Hybrid LLM+deterministic split",
+        "Guardrail strictness vs UX fluidity",
+        "Recovery aggressiveness vs safety"
+      ],
+      "alternatives_rejected": [
+        "Fully autonomous LLM browser control",
+        "Pure static/rule-only parsing",
+        "Single selector-only execution without recovery"
+      ],
+      "rejection_reasons": "Rejected due to safety, brittleness, weak adaptability, and poor production reproducibility.",
+      "accepted_tradeoffs": [
+        "Reduced autonomy for deterministic safety",
+        "More conservative no_match outcomes",
+        "Higher architectural complexity for resilience"
+      ],
+      "technical_debt": [
+        "Advanced healing/visual recovery not fully wired into hot path",
+        "Potential SDK source-dist drift risk",
+        "In-memory fallback state not ideal for horizontal scale",
+        "Secret hygiene/process debt in env handling"
+      ],
+      "redesign_today": [
+        "Shared API-SDK schema source with contract CI tests",
+        "Activate and productionize true LLM provider failover",
+        "Externalize session state for scale",
+        "Feature-flagged rollout controls for healing/visual recovery"
+      ]
+    },
+    "7_engineering_challenges": {
+      "top_10_hardest_problems": [
+        "LLM flexibility vs deterministic safety",
+        "Selector drift and UI changes",
+        "Auth-gated intent continuity",
+        "Voice UX latency variance",
+        "Page-awareness with lightweight runtime context",
+        "Low-confidence/ambiguous intent handling",
+        "Multi-step execution loop safety",
+        "Credential/PII safety",
+        "Generator input normalization across messy formats",
+        "Backend-SDK contract consistency"
+      ],
+      "how_solved": "Solved with layered deterministic architecture, schema contracts, guardrails, recovery matrix, session memory, planner kill switches, and validation/eval tooling.",
+      "what_failed_before_final": [
+        "Simplistic single-pass routing",
+        "Static selector assumptions",
+        "Lower-context intent parse",
+        "Undifferentiated failure handling"
+      ],
+      "unexpected_bugs": [
+        "Legacy schema anomalies (pages object, keywords key, nested actions)",
+        "Selector breakages on site updates",
+        "Potential dist artifact drift relative to SDK src"
+      ],
+      "production_incidents": [
+        "Selector failure classes likely occurred",
+        "Auth-flow interruption classes likely occurred",
+        "Upstream model/network transient classes likely occurred",
+        "[CLARIFY: Explicit incident timeline and severity data not present in repository.]"
+      ],
+      "performance_bottlenecks": [
+        "LLM parse latency variance",
+        "Cache misses causing DB lookups",
+        "Execution uncertainty on dynamic DOM",
+        "Recovery loops under selector churn"
+      ],
+      "scalability_issues": [
+        "In-memory fallback consistency limits across replicas",
+        "Model dependency on hot path",
+        "High-volume logging throughput pressure",
+        "Need stronger distributed session/cache strategy"
+      ]
+    },
+    "8_ai_architecture": {
+      "ai_involved": true,
+      "models_used": [
+        "qwen-qwq-32b via Groq (primary in parser and generator intent generation)"
+      ],
+      "model_choice_rationale": "Optimized for low-latency structured intent parsing rather than long-form generation.",
+      "prompting_strategy": "Schema-constrained prompts with trust separation (user intent high-trust, browser snapshot low-trust) and strict JSON output.",
+      "rag_strategy": "No vector RAG; contextual grounding comes from agent.json + page_context + AXTree-like snapshot + session memory.",
+      "fallback_strategy": "Unknown-intent fallback, guardrail no_match fallback, deterministic resolver coverage, recovery branch for runtime failures.",
+      "evaluation_strategy": "Categorized eval suites with expected instruction assertions, mock-mode regression checks, and optional real-model runs.",
+      "guardrails": [
+        "Prompt injection pattern checks",
+        "Confidence thresholds",
+        "Semantic coherence checks",
+        "Risk classification",
+        "External URL/security pattern blocks"
+      ],
+      "hallucination_prevention": "LLM cannot execute actions directly; deterministic resolver enforces contract-bound actions.",
+      "latency_optimizations": [
+        "Single inference call on hot path",
+        "Token/temperature caps",
+        "Cache-first lookups",
+        "Async logging"
+      ],
+      "cost_optimizations": [
+        "Parse-only model use",
+        "Deterministic post-parse execution",
+        "No default vector infra",
+        "Fallback modules invoked conditionally"
+      ]
+    },
+    "9_voice_architecture": {
+      "applicable": true,
+      "speech_to_text_flow": "Browser Web Speech API captures audio and emits interim/final transcript events to SDK pipeline.",
+      "text_to_speech_flow": "No synthesized TTS pipeline in current code; spoken responses represented as UI messages.",
+      "streaming_architecture": "Interim transcript updates are local-stream-like, backend processing remains per-utterance HTTP request/response.",
+      "latency_targets": "[CLARIFY: No explicit formal SLO values committed in repository; architecture tuned for interactive sub-second to low-second behavior.]",
+      "voice_interruption_handling": "Mic state machine, silence timeout stop, and hotkey press/release control prevent overlap.",
+      "error_recovery": "User-friendly STT error mapping, timeout handling, retry-once API calls, and downstream selector-failure escalation.",
+      "fallback_behavior": "Safe no_match with suggestions and auth-aware queue replay for blocked actions.",
+      "realtime_synchronization": "SDK state machines plus mutation observers and wait predicates synchronize execution and UI/page state."
+    },
+    "10_security": {
+      "authentication": "Hashed API-key authentication with one-time key reveal at registration.",
+      "authorization": "Action-level requires_auth gating with needs_login response flow and replay.",
+      "rate_limiting": "Per-window counters with Redis preferred and in-memory fallback.",
+      "input_validation": "Pydantic schemas, key format checks, transcript bounds, JSON parsing guards, manifest validation.",
+      "abuse_prevention": "Credential/prompt-injection detection, risk gating, semantic mismatch blocking, dangerous selector rejection.",
+      "secrets_management": "[CLARIFY: Repository includes .env with key-like value; operationally this indicates inadequate secret hygiene for source control and requires rotation + secret scanning enforcement.]",
+      "data_protection": "PII scrubbing in logs (emails, phones, cards, SSNs), no password handling automation, and constrained execution boundaries."
+    },
+    "11_analytics": {
+      "what_tracked": [
+        "Transcripts (scrubbed)",
+        "Intent type/target",
+        "Resolved flag",
+        "Instruction type",
+        "Latency",
+        "Recent failures by site"
+      ],
+      "why": "To measure resolution quality, diagnose failure patterns, and prioritize agent.json or parser improvements.",
+      "insights_discovered": "[CLARIFY: Analytics schema and endpoints exist; specific quantified insight reports are not included in repo artifacts.]",
+      "impact_on_decisions": "Design and validation emphasis on fallback suggestions, intent coverage expansion, and selector recovery pathways implies analytics-informed iteration."
+    },
+    "12_deployment": {
+      "infrastructure_used": [
+        "Docker",
+        "Nginx reverse proxy",
+        "Supabase",
+        "Optional Upstash Redis",
+        "Groq API"
+      ],
+      "hosting": "VPS deployment guide with Nginx+Certbot and optional Railway deployment instructions.",
+      "database": "Supabase (Postgres-backed service API).",
+      "monitoring": "Structured JSON logs + endpoint checks; no full APM integration defined in-repo.",
+      "ci_cd": "[CLARIFY: No explicit CI pipeline config files surfaced in current snapshot.]",
+      "logging": "Structured JSON logging formatter in backend and container/Nginx log guidance.",
+      "error_tracking": "App-level exception handlers and logs; no dedicated external error SaaS integration visible.",
+      "scaling_strategy": "Scale API statelessly, externalize session/cache state, improve provider failover, and increase log pipeline robustness."
+    },
+    "13_metrics": {
+      "users": "[CLARIFY: No user-count telemetry snapshots present.]",
+      "requests": "[CLARIFY: No total request volume report included.]",
+      "latency": "Latency fields captured per query and eval scripts report average ms.",
+      "accuracy": "Eval scripts and docs reference 90%+ class outcomes depending on mode.",
+      "agent_success_rate": "Equivalent runtime metric represented as resolved/resolution rate via analytics summary endpoint.",
+      "cost_reductions": "[CLARIFY: No audited cost report in repository.]",
+      "time_savings": "Integration model (script tag + generated manifest) implies major setup-time reduction vs bespoke implementations.",
+      "productivity_gains": "Generator + validator + eval tooling reduce manual mapping/debug burden and increase repeatability."
+    },
+    "14_lessons_learned": {
+      "biggest_mistakes": [
+        "Assuming selector stability",
+        "Underestimating schema inconsistency from upstream inputs",
+        "Allowing secret hygiene/process gaps"
+      ],
+      "what_do_differently": [
+        "Contract CI checks for SDK/API parity",
+        "Early secret scanning and strict env handling",
+        "Earlier distributed session strategy for scale"
+      ],
+      "most_valuable_lesson": "Model intelligence must be bounded by deterministic contracts and explicit safety policy to be production-trustworthy.",
+      "unexpected_discoveries": [
+        "Input normalization quality directly controls runtime reliability",
+        "Failure recovery UX is a core product feature, not just an ops concern"
+      ],
+      "engineering_principles_learned": [
+        "Constrain where nondeterminism can exist",
+        "Fail safely and observably",
+        "Keep execution contracts typed and testable",
+        "Treat runtime drift as first-class architecture input"
+      ]
+    },
+    "15_future_roadmap": {
+      "what_comes_next": [
+        "Productionize advanced healer/visual recovery loops",
+        "Strengthen distributed state and provider failover",
+        "Expand multilingual and domain-specific intent quality"
+      ],
+      "planned_features": [
+        "Confidence-gated auto-heal rollout controls",
+        "Richer analytics and per-category quality dashboards",
+        "Stronger CI contract and artifact consistency checks"
+      ],
+      "planned_architecture_improvements": [
+        "Single source of truth schema for SDK/API contracts",
+        "Externalized session memory at scale",
+        "Multi-provider LLM runtime failover activation"
+      ],
+      "if_funded_evolution": [
+        "Multi-region low-latency runtime",
+        "Robust observability stack (trace IDs, APM, SLO dashboards)",
+        "Enterprise-grade security posture (key management, abuse controls, audit trails)"
+      ]
+    }
+  },
+  "global_clarify_flags": [
+    "[CLARIFY: Need explicit production metrics export for users, request volumes, and real-world latency percentiles.]",
+    "[CLARIFY: Need incident postmortem logs (severity, timeline, blast radius, mitigation).]",
+    "[CLARIFY: Need SQL migrations/index definitions for precise storage/indexing claims.]",
+    "[CLARIFY: Need CI/CD config evidence for release gating workflow.]",
+    "[CLARIFY: Secret management process must be documented and remediated (rotate exposed-like keys).]"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "SuryaOS Core Bruno",
+  "version": "1",
+  "requests": [
+    {
+      "name": "Health",
+      "method": "GET",
+      "url": "{{baseUrl}}/health"
+    },
+    {
+      "name": "Auth Login",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/v1/auth/login",
+      "headers": { "Content-Type": "application/json" },
+      "body": {
+        "email": "admin@suryaos.dev",
+        "password": "Admin@123"
+      }
+    },
+    {
+      "name": "Projects List",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/v1/projects?page=1&page_size=10"
+    }
+  ],
+  "variables": {
+    "baseUrl": "http://localhost:8000"
+  }
+}

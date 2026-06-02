@@ -1,0 +1,41 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-06-02T10:45:00.000Z",
+  "__export_source": "suryaos-core",
+  "resources": [
+    {
+      "_id": "wrk_suryaos_core",
+      "_type": "workspace",
+      "name": "SuryaOS Core",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_suryaos_core",
+      "_type": "environment",
+      "parentId": "wrk_suryaos_core",
+      "name": "Base Environment",
+      "data": { "base_url": "http://localhost:8000" }
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "parentId": "wrk_suryaos_core",
+      "name": "Health",
+      "method": "GET",
+      "url": "{{ _.base_url }}/health"
+    },
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "parentId": "wrk_suryaos_core",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/auth/login",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@suryaos.dev\",\n  \"password\": \"Admin@123\"\n}"
+      }
+    }
+  ]
+}
