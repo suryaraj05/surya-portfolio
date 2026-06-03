@@ -12,7 +12,9 @@ export type ApiRequestOptions = {
 };
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<ApiSuccess<T>> {
-  const response = await fetch(`${apiConfig.baseUrl}${path}`, {
+  let response: Response;
+  try {
+    response = await fetch(`${apiConfig.baseUrl}${path}`, {
     method: options.method ?? "GET",
     headers: {
       "Content-Type": "application/json",
@@ -23,7 +25,11 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
       revalidate: options.revalidate,
       tags: options.tags
     }
-  });
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Network request failed";
+    throw new Error(message);
+  }
 
   const payload = (await response.json()) as
     | ApiSuccess<T>
