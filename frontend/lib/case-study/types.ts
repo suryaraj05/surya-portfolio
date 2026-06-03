@@ -149,14 +149,10 @@ export type CaseStudyReport = {
   hero: {
     title: string;
     subtitle?: string;
-    kicker?: CaseStudyKicker[];
     narrativeIntro: string;
   };
-  heroDiagram?: DiagramSpec;
-  recoveryDiagram?: DiagramSpec;
   sections: NarrativeSectionSpec[];
   engineeringDepth: EngineeringDepthItem[];
-  orchestrationCaption?: string;
   decisions: DecisionItem[];
   tradeoffs: TradeoffItem[];
   techStack: TechItem[];

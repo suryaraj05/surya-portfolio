@@ -115,83 +115,24 @@ body {
     @apply translate-x-0.5 text-foreground;
   }
 
-  /* Engineering case study report (project detail only) */
-  .case-study-report .report-hero {
-    @apply pb-0;
-  }
-
-  .report-dark-band {
-    @apply bg-[hsl(222,28%,7%)] text-white;
+  /* Editorial case study (project detail only) — calm reading column */
+  .report-read {
+    max-width: 42rem;
   }
 
   .report-prose p {
-    @apply mb-5 leading-[1.75] text-foreground/90;
+    @apply mb-7 text-[1.05rem] leading-[1.85] text-foreground/90;
   }
 
-  .report-prose-invert p {
-    @apply text-white/75;
+  .report-prose h3 {
+    @apply mb-4 mt-10 font-display text-lg tracking-tight;
   }
 
-  .report-pull-quote {
-    @apply border-l-2 border-foreground/20 py-1 pl-5;
+  .report-prose ul {
+    @apply mb-7 list-disc space-y-2 pl-6 text-[1.05rem] leading-[1.85] text-foreground/90;
   }
 
-  .report-dark-band .report-pull-quote {
-    @apply border-white/25;
-  }
-
-  .report-dark-band .report-pull-quote blockquote {
-    @apply text-white/90;
-  }
-
-  .report-section + .report-section {
-    @apply scroll-mt-20;
-  }
-
-  .case-study-report-elite .report-prose-measure {
-    max-width: 38rem;
-  }
-
-  .report-section-transition {
-    @apply transition-colors duration-500;
-  }
-
-  .report-hero-flagship .report-hero-ghost svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .report-topology-ghost {
-    opacity: 0.35;
-  }
-
-  .report-payload-body {
-    @apply transition-[box-shadow] duration-300;
-  }
-
-  .report-payload:hover .report-payload-body {
-    box-shadow: 0 20px 50px -30px rgba(15, 23, 42, 0.55);
-  }
-
-  .report-continue a:focus-visible {
-    @apply outline-none ring-2 ring-foreground/20 ring-offset-2;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .report-diagram-animate .trace-line {
-      stroke-dasharray: 1200;
-      stroke-dashoffset: 1200;
-      animation: report-line-trace 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    .report-diagram-animate .trace-recovery {
-      animation-delay: 0.6s;
-    }
-  }
-
-  @keyframes report-line-trace {
-    to {
-      stroke-dashoffset: 0;
-    }
+  .report-compact-diagram svg {
+    @apply h-auto w-full max-h-[220px];
   }
 }

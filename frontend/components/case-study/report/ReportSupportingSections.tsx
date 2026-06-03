@@ -1,146 +1,70 @@
 import { RichText } from "@/components/case-study/RichText";
-import { Container } from "@/components/layout/container";
-import { Stack } from "@/components/layout/stack";
-import { Heading } from "@/components/typography/heading";
-import { Text } from "@/components/typography/text";
-import type { DecisionItem, MetricItem, TechItem, TradeoffItem } from "@/lib/case-study/types";
-import { getHeroDiagramForSlug } from "@/lib/case-study/diagrams";
+import type { DecisionItem, EngineeringDepthItem, MetricItem, TradeoffItem } from "@/lib/case-study/types";
 
-import { DarkInversionBand } from "./DarkInversionBand";
-import { FullWidthDiagram } from "./FullWidthDiagram";
-import { ReportReveal } from "./ReportMotion";
+import { ReportEditorialSection } from "./ReportEditorialSection";
 
-export function ReportDecisions({ decisions }: { decisions: DecisionItem[] }) {
-  if (!decisions.length) return null;
-
-  return (
-    <section className="report-section py-12 md:py-14">
-      <Container>
-        <ReportReveal>
-        <Stack size="lg">
-          <div className="max-w-prose">
-            <p className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">Chapter IV · Decisions</p>
-            <h2 className="mt-3 font-display text-[clamp(1.55rem,2.8vw,2.25rem)] tracking-[-0.02em]">
-              Design decisions under constraint
-            </h2>
-          </div>
-          <div className="grid gap-6 lg:grid-cols-2">
-            {decisions.map((d) => (
-              <article key={d.title} className="rounded-xl border border-border/80 bg-muted/20 p-6 md:p-7">
-                <Heading as="h3" size="sm" className="text-lg">
-                  {d.title}
-                </Heading>
-                <RichText markdown={d.rationaleMarkdown} className="report-prose mt-4 max-w-none text-sm" />
-                {d.alternativesMarkdown ? (
-                  <RichText markdown={d.alternativesMarkdown} className="report-prose mt-4 max-w-none text-sm text-muted-foreground" />
-                ) : null}
-                {d.codeBlock ? (
-                  <RichText
-                    markdown={`\`\`\`${d.codeBlock.language ?? ""}\n${d.codeBlock.content}\n\`\`\``}
-                    className="mt-4"
-                  />
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </Stack>
-        </ReportReveal>
-      </Container>
-    </section>
-  );
-}
-
-export function ReportTradeoffs({ items }: { items: TradeoffItem[] }) {
+export function ReportMechanics({ items }: { items: EngineeringDepthItem[] }) {
   if (!items.length) return null;
 
+  const body = items
+    .map((item) => {
+      const detail = item.detail ? ` ${item.detail}` : "";
+      return `**${item.title}** — ${item.summary}${detail}`;
+    })
+    .join("\n\n");
+
   return (
-    <section className="report-section border-b border-border/40 py-10 md:py-12">
-      <Container>
-        <p className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">Trade-offs</p>
-        <Heading as="h2" size="md" className="mt-3 text-[clamp(1.35rem,2vw,1.85rem)]">
-          Explicit compromises
-        </Heading>
-        <div className="mt-8 grid gap-5 md:grid-cols-2">
-          {items.map((item) => (
-            <article key={item.title} className="border-l-2 border-foreground/15 pl-5">
-              <h3 className="font-display text-base tracking-tight">{item.title}</h3>
-              <RichText markdown={item.markdown} className="report-prose mt-2 max-w-none text-sm" />
-            </article>
-          ))}
-        </div>
-      </Container>
-    </section>
+    <ReportEditorialSection eyebrow="04 · Operations" title="Operational mechanics" id="mechanics">
+      <RichText markdown={body} className="report-prose" />
+    </ReportEditorialSection>
   );
 }
 
-export function ReportTechStack({ tech }: { tech: TechItem[] }) {
-  if (!tech.length) return null;
+export function ReportTradeoffs({ items, decisions }: { items: TradeoffItem[]; decisions?: DecisionItem[] }) {
+  if (!items.length && !decisions?.length) return null;
+
+  const parts: string[] = [];
+
+  if (decisions?.length) {
+    for (const d of decisions) {
+      let block = `### ${d.title}\n\n${d.rationaleMarkdown}`;
+      if (d.alternativesMarkdown) block += `\n\n${d.alternativesMarkdown}`;
+      if (d.codeBlock) {
+        block += `\n\n\`\`\`${d.codeBlock.language ?? ""}\n${d.codeBlock.content}\n\`\`\``;
+      }
+      parts.push(block);
+    }
+  }
+
+  for (const t of items) {
+    parts.push(`### ${t.title}\n\n${t.markdown}`);
+  }
 
   return (
-    <section className="report-section py-section-tight">
-      <Container>
-        <p className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">Stack</p>
-        <Heading as="h2" size="md" className="mt-3 text-[clamp(1.35rem,2vw,1.85rem)]">
-          Production stack
-        </Heading>
-        <div className="mt-8 flex flex-wrap gap-2">
-          {tech.map((t) => (
-            <span
-              key={t.name}
-              className="rounded-lg border border-border/80 bg-background px-3 py-2 font-mono text-xs text-foreground/90 transition hover:border-foreground/20"
-            >
-              {t.name}
-            </span>
-          ))}
-        </div>
-      </Container>
-    </section>
+    <ReportEditorialSection eyebrow="05 · Tradeoffs" title="Explicit compromises" id="tradeoffs">
+      <RichText markdown={parts.join("\n\n")} className="report-prose" />
+    </ReportEditorialSection>
   );
 }
 
-export function ReportOutcomeMetrics({ metrics }: { metrics: MetricItem[] }) {
-  if (!metrics.length) return null;
-
-  const unique = metrics.filter(
-    (m, i, arr) => arr.findIndex((x) => x.label === m.label) === i
-  );
+export function ReportResults({ metrics }: { metrics: MetricItem[] }) {
+  const unique = metrics.filter((m, i, arr) => arr.findIndex((x) => x.label === m.label) === i).slice(0, 5);
+  if (!unique.length) return null;
 
   return (
-    <DarkInversionBand>
-      <p className="text-[0.65rem] uppercase tracking-[0.16em] text-white/45">Outcomes</p>
-      <Heading as="h2" size="md" className="mt-3 text-white text-[clamp(1.35rem,2vw,1.85rem)]">
-        Measured results
-      </Heading>
-      <div className="mt-8 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
-        {unique.slice(0, 6).map((m) => (
-          <div key={m.label} className="bg-[hsl(222,28%,7%)] px-5 py-6">
-            <div className="font-display text-2xl tracking-tight text-white">{m.value}</div>
-            <Text tone="muted" size="sm" className="mt-1 text-white/55">
-              {m.label}
-            </Text>
-            {m.note ? <p className="mt-2 text-xs text-white/40">{m.note}</p> : null}
+    <ReportEditorialSection eyebrow="06 · Results" title="Measured outcomes" id="results">
+      <dl className="space-y-6">
+        {unique.map((m) => (
+          <div key={m.label} className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
+            <dt className="text-sm text-muted-foreground">{m.label}</dt>
+            <dd className="font-display text-xl tracking-tight text-foreground sm:text-right">
+              {m.value}
+              {m.note ? <span className="mt-1 block font-sans text-xs font-normal text-muted-foreground">{m.note}</span> : null}
+            </dd>
           </div>
         ))}
-      </div>
-    </DarkInversionBand>
-  );
-}
-
-export function OrchestrationVisual({ slug, caption }: { slug: string; caption?: string }) {
-  const diagram = getHeroDiagramForSlug(slug);
-  if (!diagram) return null;
-
-  return (
-    <section className="py-section-tight">
-      <Container className="mb-6 max-w-prose">
-        <p className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">Orchestration</p>
-        <Heading as="h2" size="md" className="mt-3 text-[clamp(1.35rem,2vw,1.85rem)]">
-          Control flow and handoffs
-        </Heading>
-        {caption ? <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{caption}</p> : null}
-      </Container>
-      <FullWidthDiagram spec={{ ...diagram, caption: caption ?? "System orchestration" }} />
-    </section>
+      </dl>
+    </ReportEditorialSection>
   );
 }
 
@@ -148,12 +72,8 @@ export function ReportLessons({ markdown }: { markdown: string }) {
   if (!markdown.trim()) return null;
 
   return (
-    <DarkInversionBand>
-      <p className="text-[0.65rem] uppercase tracking-[0.16em] text-white/45">Closing</p>
-      <Heading as="h2" size="md" className="mt-3 text-white">
-        Lessons from production
-      </Heading>
-      <RichText markdown={markdown} className="report-prose report-prose-invert mt-6 max-w-prose" />
-    </DarkInversionBand>
+    <ReportEditorialSection eyebrow="07 · Closing" title="Lessons learned" id="lessons">
+      <RichText markdown={markdown} className="report-prose" />
+    </ReportEditorialSection>
   );
 }

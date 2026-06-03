@@ -1,14 +1,7 @@
-import { cn } from "@/lib/utils";
-
-export function PullQuote({ children, className, dark }: { children: string; className?: string; dark?: boolean }) {
+export function PullQuote({ children, className }: { children: string; className?: string }) {
   return (
-    <figure className={cn("report-pull-quote not-prose", className)}>
-      <blockquote
-        className={cn(
-          "font-display text-[clamp(1.35rem,2.8vw,2rem)] leading-[1.2] tracking-[-0.02em]",
-          dark ? "text-white/92" : "text-foreground"
-        )}
-      >
+    <figure className={className}>
+      <blockquote className="border-l border-foreground/15 pl-6 font-display text-[clamp(1.25rem,2.2vw,1.65rem)] leading-[1.35] tracking-[-0.015em] text-foreground/90">
         {children}
       </blockquote>
     </figure>

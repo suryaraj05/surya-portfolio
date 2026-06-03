@@ -1,5 +1,4 @@
 import type {
-  ArchitectureCallout,
   CaseStudyContent,
   DecisionItem,
   EngineeringDepthItem,
@@ -13,7 +12,6 @@ export type SlugEnrichment = Partial<CaseStudyContent> & {
   narrativeIntro?: string;
   sections?: NarrativeSectionSpec[];
   engineeringDepth?: EngineeringDepthItem[];
-  orchestrationCaption?: string;
   editorialTitles?: {
     problem?: string;
     solution?: string;
@@ -22,9 +20,9 @@ export type SlugEnrichment = Partial<CaseStudyContent> & {
 };
 
 const NINA_PAYLOAD: PayloadBlock = {
-  title: "Query handoff — runtime contract",
+  title: "Runtime contract",
   language: "json",
-  caption: "Typed instruction returned after parse → resolve → guardrails",
+  caption: "Typed instruction after parse, resolve, and guardrails.",
   content: `{
   "instruction": "navigate",
   "target": "/pricing",
@@ -36,9 +34,9 @@ const NINA_PAYLOAD: PayloadBlock = {
 };
 
 const VISION_PAYLOAD: PayloadBlock = {
-  title: "Shot-plan payload",
+  title: "Shot-plan output",
   language: "json",
-  caption: "Structured pre-production output consumed by review UI",
+  caption: "Structured pre-production artifact for review.",
   content: `{
   "scene_id": "sc_014",
   "shots": [
@@ -50,9 +48,9 @@ const VISION_PAYLOAD: PayloadBlock = {
 };
 
 const TAX_PAYLOAD: PayloadBlock = {
-  title: "Filing route validation",
+  title: "Validation gate output",
   language: "json",
-  caption: "Gate output before orchestration commits a path",
+  caption: "Emitted before orchestration commits a filing path.",
   content: `{
   "form": "ITR-2",
   "gates_passed": ["identity", "income_consistency", "deduction_caps"],
@@ -64,118 +62,61 @@ const TAX_PAYLOAD: PayloadBlock = {
 const ENRICHMENTS: Record<string, SlugEnrichment> = {
   "nina-voice-ai-agent-sdk": {
     narrativeIntro:
-      "A production voice navigation control plane that separates probabilistic language understanding from deterministic browser execution — designed for teams shipping voice on real websites.",
-    editorialTitles: {
-      problem: "Why voice breaks in production",
-      solution: "Constraining autonomy at the boundary",
-      architecture: "Three-plane system topology"
-    },
+      "A production voice navigation control plane that separates probabilistic language understanding from deterministic browser execution — built for teams shipping voice on real websites.",
     sections: [
       {
         id: "context",
-        eyebrow: "Chapter I · Context",
         title: "Why voice interfaces fail in production",
-        layout: "anchored",
-        density: "compact",
         markdown:
-          "Most web voice interfaces fail outside demos: selector drift, auth gates, and unconstrained model behavior collapse reliability. Teams either rebuild per-site logic or accept brittle automation.\n\nNINA's thesis is operational — language can be probabilistic, but execution must be contract-bound and policy-checked.",
-        pullQuote:
-          "The model interprets intent. The resolver owns execution. Guardrails own safety.",
-        microNotes: [
-          { label: "Failure class", value: "Selector drift · auth gates" },
-          { label: "Design stance", value: "Parse ≠ execute" },
-          { label: "Runtime mode", value: "Production voice loop" }
-        ],
-        annotations: ["Operational insight — not a feature list"],
-        callouts: [
-          {
-            tag: "Insight",
-            title: "Parse vs execute split",
-            body: "One LLM parse step maps speech to intent; deterministic modules map intent to typed instructions against agent.json."
-          },
-          {
-            tag: "Constraint",
-            title: "Production reality",
-            body: "Rate limits, session memory, selector failure reporting, and explicit recovery paths are first-class — not add-ons."
-          }
-        ]
+          "Most web voice interfaces fail outside demos: selector drift, auth gates, and unconstrained model behavior collapse reliability. Teams either rebuild per-site logic or accept brittle automation.\n\nThe operational thesis is simple — language can be probabilistic, but execution must be contract-bound and policy-checked.",
+        pullQuote: "The model interprets intent. The resolver owns execution. Guardrails own safety."
       },
       {
-        id: "response",
-        eyebrow: "Chapter II · Response",
+        id: "insight",
         title: "Constraining autonomy at the execution boundary",
-        layout: "dense",
-        density: "balanced",
         markdown:
-          "NINA ships as three packages: offline generator (site intelligence), FastAPI decision engine (runtime), and embeddable SDK (capture + DOM execution).\n\nThe SDK never receives free-form tool output — only typed instructions (`navigate`, `search`, `click`, `needs_login`, `no_match`) after guardrails and auth gating.",
+          "NINA ships as three packages: an offline generator for site intelligence, a FastAPI decision engine at runtime, and an embeddable SDK for capture and DOM execution.\n\nThe SDK never receives free-form tool output. It receives typed instructions — navigate, search, click, needs_login, no_match — only after guardrails and auth gating pass.",
         payloads: [NINA_PAYLOAD]
       },
       {
         id: "architecture",
-        eyebrow: "Chapter III · Architecture",
         title: "Multi-layer control plane topology",
-        layout: "visual-led",
-        density: "immersive",
-        tone: "dark",
         markdown:
-          "Control flow is policy-first: validate → rate-limit → load site contract → parse → resolve → safety checks → auth gate → return instruction. On selector failure, the SDK reports upstream and receives a recovery instruction from a failure decision matrix.",
-        callouts: [
-          {
-            tag: "State",
-            title: "Hybrid session memory",
-            body: "Browser queue + session ID on the SDK; semantic memory and action log on the API; Supabase for site metadata and telemetry."
-          },
-          {
-            tag: "Cache",
-            title: "Redis TTL layers",
-            body: "Agent config, rate counters, and session keys with in-memory fallback for degraded mode."
-          }
-        ]
+          "Control flow is policy-first: validate, rate-limit, load the site contract, parse intent, resolve deterministically, run safety checks, apply auth gating, then return an instruction.\n\nWhen selector execution fails, the SDK reports upstream and receives a recovery instruction from a failure decision matrix — a standard path, not an exceptional one.\n\nSession state spans browser queue and session identifiers on the SDK, semantic memory and action logs on the API, and Supabase for site metadata and query telemetry. Redis backs TTL caches for agent config, rate counters, and session keys."
       }
     ],
     engineeringDepth: [
       {
-        title: "Handoff examples",
-        summary: "QueryRequest → IntentResult → ResolvedIntent → QueryResponse",
-        detail: "SelectorFailureReport branches to recovery matrix before re-entering execution."
+        title: "Handoffs",
+        summary: "QueryRequest → IntentResult → ResolvedIntent → QueryResponse, with SelectorFailureReport branching to recovery before re-execution."
       },
       {
-        title: "Routing logic",
-        summary: "Resolver maps intents to agent.json actions with semantic mismatch blocking.",
-        detail: "Low-confidence paths return no_match rather than guessing DOM targets."
+        title: "Routing",
+        summary: "Resolver maps intents to agent.json actions; semantic mismatch and low confidence return no_match instead of guessing DOM targets."
       },
       {
-        title: "Validation gates",
-        summary: "Guardrails enforce confidence, risk class, and injection checks pre-response.",
-        detail: "Auth gate emits needs_login when contract requires credentials."
+        title: "Validation",
+        summary: "Guardrails enforce confidence, risk class, and injection checks before any instruction leaves the API."
       },
       {
-        title: "Failure recovery",
-        summary: "Runtime selector drift is a standard path, not an exception.",
-        detail: "Healer modules and iteration caps prevent unbounded retry loops."
+        title: "Recovery",
+        summary: "Selector drift triggers a classifier matrix and bounded retry — healer modules cap iteration to prevent runaway loops."
       },
       {
         title: "Observability",
-        summary: "Async query logging with structured action and observation history.",
-        detail: "Operational teams can replay parse → resolve decisions without reproducing voice input."
+        summary: "Async query logging with structured action and observation history — parse and resolve decisions are replayable without reproducing voice input."
       }
     ],
-    orchestrationCaption: "Constrained orchestration — modular handoffs without multi-agent sprawl",
     decisions: [
       {
         title: "Hybrid LLM + deterministic execution",
         rationaleMarkdown:
-          "Keep the LLM in a parse-only role. Resolve actions deterministically against agent.json for reproducibility and auditability.",
-        codeBlock: {
-          language: "text",
-          content: "speech → parse(IntentResult) → resolve(ResolvedIntent) → guardrails → instruction"
-        }
+          "The LLM stays in a parse-only role. Actions resolve deterministically against agent.json for reproducibility and auditability."
       },
       {
         title: "Conservative guardrails",
         rationaleMarkdown:
-          "Block low-confidence or semantically mismatched actions. Incorrect navigation is costlier than a clarifying fallback.",
-        alternativesMarkdown: "Alternative: allow model-proposed selectors — rejected for production safety."
+          "Block low-confidence or semantically mismatched actions. Incorrect navigation is costlier than a clarifying fallback."
       }
     ],
     tradeoffs: [
@@ -185,140 +126,114 @@ const ENRICHMENTS: Record<string, SlugEnrichment> = {
       },
       {
         title: "Coverage vs precision",
-        markdown: "More `no_match` responses at the edge, fewer silent wrong clicks in production."
+        markdown: "More no_match responses at the edge, fewer silent wrong clicks in production."
       }
     ],
     metrics: [
       { label: "Parse latency (p95)", value: "<120ms", note: "Voice loop budget" },
-      { label: "Recovery success", value: "87%", note: "Post selector-failure reports" },
+      { label: "Recovery success", value: "87%", note: "After selector-failure reports" },
       { label: "Sites onboarded", value: "12+", note: "Generator + SDK embed" }
     ]
   },
   "visionsync-ai-preproduction-platform": {
     narrativeIntro:
-      "An AI pre-production platform that turns creative briefs into reviewable shot plans — built for teams who need structure before cameras roll, not another generative demo.",
-    editorialTitles: {
-      problem: "Pre-production without a system of record",
-      solution: "Structured planning as the product",
-      architecture: "Multi-agent planning pipeline"
-    },
+      "An AI pre-production platform that turns creative briefs into reviewable shot plans — for teams who need structure before cameras roll.",
     sections: [
       {
         id: "context",
-        eyebrow: "01 · Context",
         title: "Pre-production without a system of record",
         markdown:
-          "Creative teams lose weeks reconciling spreadsheets, storyboards, and ad-hoc AI outputs. VisionSync treats the shot plan as the canonical artifact — every agent output must land in a reviewable structure.",
-        pullQuote: "Generative novelty is cheap. Reviewable structure is the product.",
-        layout: "anchored",
-        density: "compact",
-        microNotes: [
-          { label: "Canonical artifact", value: "Shot board" },
-          { label: "Review gate", value: "Human approval required" }
-        ]
+          "Creative teams lose weeks reconciling spreadsheets, storyboards, and ad-hoc AI outputs. Without a canonical artifact, generative novelty does not translate into shootable plans.",
+        pullQuote: "Generative novelty is cheap. Reviewable structure is the product."
       },
       {
-        id: "response",
-        eyebrow: "Chapter II · Response",
+        id: "insight",
         title: "Structured planning as the product",
-        layout: "dense",
-        density: "balanced",
         markdown:
-          "Ingest briefs and references, decompose into scenes, generate shot lists with lens and duration metadata, and route through human approval gates before export.",
+          "VisionSync ingests briefs and references, decomposes into scenes, generates shot lists with lens and duration metadata, and routes through human approval before export. Every agent output must normalize into the shot board.",
         payloads: [VISION_PAYLOAD]
       },
       {
         id: "architecture",
-        eyebrow: "03 · Architecture",
         title: "Multi-agent planning pipeline",
-        layout: "visual-led",
-        density: "immersive",
-        tone: "dark",
         markdown:
-          "Specialist agents handle breakdown, visual references, and shot grammar. A coordinator enforces schema validity and blocks downstream handoff until review status is green."
+          "Specialist agents handle breakdown, visual references, and shot grammar. A coordinator enforces schema validity and blocks downstream handoff until review status is green. Partial regeneration is supported without discarding approved scenes."
       }
     ],
     engineeringDepth: [
-      { title: "Handoff examples", summary: "Brief → scene graph → shot board → export package." },
-      { title: "Routing logic", summary: "Coordinator selects agent chains based on brief type and media class." },
-      { title: "Validation gates", summary: "Schema validation on every agent output before merge." },
-      { title: "Failure recovery", summary: "Partial plan regeneration without discarding approved scenes." },
+      { title: "Handoffs", summary: "Brief → scene graph → shot board → export package." },
+      { title: "Routing", summary: "Coordinator selects agent chains by brief type and media class." },
+      { title: "Validation", summary: "Schema validation on every agent output before merge." },
+      { title: "Recovery", summary: "Regenerate partial plans without invalidating approved scenes." },
       { title: "Observability", summary: "Per-scene audit trail with model version and reviewer attribution." }
     ],
     decisions: [
       {
         title: "Shot plan as source of truth",
-        rationaleMarkdown: "All generative outputs normalize into a single review surface — not disconnected assets."
+        rationaleMarkdown: "All generative outputs normalize into one review surface — not disconnected assets."
+      }
+    ],
+    tradeoffs: [
+      {
+        title: "Speed vs review depth",
+        markdown: "Faster first drafts trade off against mandatory human approval on high-stakes scenes."
       }
     ],
     metrics: [
-      { label: "Plan generation", value: "<2.5s", note: "Warm path p95" },
-      { label: "Reviewer acceptance", value: "94%", note: "First-pass shot boards" }
+      { label: "Plan generation (p95)", value: "<2.5s" },
+      { label: "First-pass acceptance", value: "94%" }
     ]
   },
   "taxsetu-ai-tax-orchestration-system": {
     narrativeIntro:
-      "A tax orchestration system that routes filers through validation gates and agent-assisted preparation — built for correctness under regulatory constraints, not chat novelty.",
-    editorialTitles: {
-      problem: "Filing paths fail silently",
-      solution: "Gate-first orchestration",
-      architecture: "Compliance-bound agent graph"
-    },
+      "A tax orchestration system that routes filers through validation gates and agent-assisted preparation — built for correctness under regulatory constraints.",
     sections: [
       {
         id: "context",
-        eyebrow: "01 · Context",
-        title: "Filing paths fail silently",
+        title: "When filing paths fail silently",
         markdown:
-          "Tax products often optimize for conversational UX while under-investing in validation topology. TaxSetu models filing as a directed graph with explicit gates before any handoff to e-filing adapters.",
-        pullQuote: "Correctness is a graph problem — not a prompt problem.",
-        layout: "anchored",
-        density: "compact",
-        microNotes: [
-          { label: "Topology", value: "Directed validation graph" },
-          { label: "Escalation", value: "Human edge · first-class" }
-        ]
+          "Tax products often optimize for conversational UX while under-investing in validation topology. Failures surface late — at filing time — when correction is expensive.",
+        pullQuote: "Correctness is a graph problem, not a prompt problem."
       },
       {
-        id: "response",
-        eyebrow: "Chapter II · Response",
+        id: "insight",
         title: "Gate-first orchestration",
-        layout: "dense",
-        density: "balanced",
         markdown:
-          "Agents prepare sections; validators enforce caps, consistency rules, and form applicability; orchestration only commits when all gates pass.",
+          "Agents prepare sections; validators enforce caps, consistency rules, and form applicability; orchestration commits only when all gates pass.",
         payloads: [TAX_PAYLOAD]
       },
       {
         id: "architecture",
-        eyebrow: "03 · Architecture",
         title: "Compliance-bound agent graph",
-        layout: "visual-led",
-        density: "immersive",
-        tone: "dark",
         markdown:
-          "Specialist agents for income, deductions, and form selection feed a coordinator that cannot bypass validation nodes. Human escalation is a first-class edge, not an error state."
+          "Specialist agents for income, deductions, and form selection feed a coordinator that cannot bypass validation nodes. Human escalation is a first-class edge. Rollback returns to the last gate-passed snapshot on adapter errors."
       }
     ],
     engineeringDepth: [
-      { title: "Handoff examples", summary: "Section agents → validation node → efiling adapter." },
-      { title: "Routing logic", summary: "Form type determines agent chain and gate ordering." },
-      { title: "Validation gates", summary: "Identity, income consistency, and deduction caps before commit." },
-      { title: "Failure recovery", summary: "Rollback to last gate-passed snapshot on adapter errors." },
+      { title: "Handoffs", summary: "Section agents → validation node → e-filing adapter." },
+      { title: "Routing", summary: "Form type determines agent chain and gate ordering." },
+      { title: "Validation", summary: "Identity, income consistency, and deduction caps before commit." },
+      { title: "Recovery", summary: "Rollback to last gate-passed snapshot on adapter errors." },
       { title: "Observability", summary: "Immutable audit log per filing attempt with gate outcomes." }
     ],
+    tradeoffs: [
+      {
+        title: "Automation vs escalation",
+        markdown: "More human edges increase latency but reduce costly filing errors."
+      }
+    ],
     metrics: [
-      { label: "Validation pass rate", value: "98.5%", note: "Pre-handoff" },
-      { label: "Orchestration latency", value: "<800ms", note: "Coordinator path" }
+      { label: "Pre-handoff validation", value: "98.5%" },
+      { label: "Coordinator latency", value: "<800ms" }
     ]
   }
 };
 
 const DEFAULT_DEPTH: EngineeringDepthItem[] = [
-  { title: "Handoff examples", summary: "Typed contracts between services and agent modules." },
-  { title: "Routing logic", summary: "Policy-first dispatch with explicit fallback paths." },
-  { title: "Validation gates", summary: "Pre-commit checks before side effects." },
-  { title: "Failure recovery", summary: "Structured retry and human escalation edges." },
+  { title: "Handoffs", summary: "Typed contracts between services and agent modules." },
+  { title: "Routing", summary: "Policy-first dispatch with explicit fallback paths." },
+  { title: "Validation", summary: "Pre-commit checks before side effects." },
+  { title: "Recovery", summary: "Structured retry and human escalation where required." },
   { title: "Observability", summary: "Traces and audit logs for production debugging." }
 ];
 
@@ -328,9 +243,9 @@ export function getSlugEnrichment(slug: string): SlugEnrichment | undefined {
 
 export function getDefaultEditorialTitles() {
   return {
-    problem: "Operational context",
-    solution: "Engineering response",
-    architecture: "Control plane architecture"
+    problem: "The problem",
+    solution: "Core insight",
+    architecture: "Architecture decision"
   };
 }
 

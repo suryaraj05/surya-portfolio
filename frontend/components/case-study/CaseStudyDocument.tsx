@@ -1,21 +1,14 @@
 import type { ProjectDTO } from "@/src/contracts/types";
 import type { CaseStudyContent, ProjectNavItem } from "@/lib/case-study/types";
 
-import { MediaGallery } from "@/components/case-study/MediaGallery";
-import {
-  CaseStudyReportHero,
-  EngineeringDepthBand,
-  ReportNarrativeSection
-} from "@/components/case-study/report";
-import { FullWidthDiagram } from "@/components/case-study/report/FullWidthDiagram";
+import { CaseStudyReportHero } from "@/components/case-study/report/CaseStudyReportHero";
 import { ReportContinueReading } from "@/components/case-study/report/ReportContinueReading";
+import { ReportNarrativeSection } from "@/components/case-study/report/ReportNarrativeSection";
 import { ReportProjectNav } from "@/components/case-study/report/ReportProjectNav";
 import {
-  OrchestrationVisual,
-  ReportDecisions,
   ReportLessons,
-  ReportOutcomeMetrics,
-  ReportTechStack,
+  ReportMechanics,
+  ReportResults,
   ReportTradeoffs
 } from "@/components/case-study/report/ReportSupportingSections";
 import { resolveCaseStudyReport } from "@/lib/case-study/resolve-report";
@@ -29,23 +22,9 @@ type CaseStudyDocumentProps = {
   nextProject?: ProjectNavItem;
 };
 
-function mapMedia(project: ProjectDTO, content?: Partial<CaseStudyContent>) {
-  if (content?.media) return content.media;
-
-  const images = [
-    ...(project.cover_image ? [{ src: project.cover_image, alt: `${project.title} cover` }] : []),
-    ...(project.gallery_images ?? []).map((src, idx) => ({
-      src,
-      alt: `${project.title} gallery image ${idx + 1}`
-    }))
-  ];
-
-  if (!images.length) return null;
-  return { images };
-}
-
 /**
- * Elite editorial engineering report — project detail pages only.
+ * Calm editorial case study — project detail pages only.
+ * Problem → insight → architecture → mechanics → tradeoffs → results → lessons.
  */
 export function CaseStudyDocument({
   project,
@@ -56,49 +35,25 @@ export function CaseStudyDocument({
 }: CaseStudyDocumentProps) {
   const report = resolveCaseStudyReport(project, content);
   const systemProfile = getSystemMetrics(project.slug, project.tech_stack ?? []);
-  const media = mapMedia(project, content);
 
   return (
-    <article className="case-study-report case-study-report-elite w-full">
+    <article className="case-study-report w-full">
       <CaseStudyReportHero
-        slug={report.slug}
         title={report.hero.title}
         subtitle={report.hero.subtitle}
         narrativeIntro={report.hero.narrativeIntro}
-        kicker={report.hero.kicker}
         systemProfile={systemProfile}
       />
 
-      {report.heroDiagram ? (
-        <FullWidthDiagram spec={report.heroDiagram} className="border-b border-border/50" />
-      ) : null}
-
-      {report.sections.map((section, index) => (
-        <ReportNarrativeSection key={section.id} section={section} index={index} />
+      {report.sections.map((section) => (
+        <ReportNarrativeSection key={section.id} section={section} />
       ))}
 
-      {report.orchestrationCaption &&
-      !report.sections.some((s) => s.layout === "visual-led") ? (
-        <OrchestrationVisual slug={report.slug} caption={report.orchestrationCaption} />
-      ) : null}
+      <ReportMechanics items={report.engineeringDepth} />
 
-      <EngineeringDepthBand items={report.engineeringDepth} recoveryDiagram={report.recoveryDiagram} />
+      <ReportTradeoffs items={report.tradeoffs} decisions={report.decisions} />
 
-      <ReportDecisions decisions={report.decisions} />
-
-      <ReportTradeoffs items={report.tradeoffs} />
-
-      <ReportTechStack tech={report.techStack} />
-
-      <ReportOutcomeMetrics metrics={report.outcomeMetrics} />
-
-      {media ? (
-        <section className="report-section py-12">
-          <div className="mx-auto w-full max-w-layout px-content-x">
-            <MediaGallery spec={media} />
-          </div>
-        </section>
-      ) : null}
+      <ReportResults metrics={report.outcomeMetrics} />
 
       {content?.lessonsMarkdown || report.lessonsMarkdown ? (
         <ReportLessons markdown={content?.lessonsMarkdown ?? report.lessonsMarkdown ?? ""} />
