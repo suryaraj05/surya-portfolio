@@ -111,6 +111,22 @@ export type EngineeringDepthItem = {
   detail?: string;
 };
 
+export type SectionLayout =
+  | "anchored"
+  | "insight"
+  | "dense"
+  | "visual-led"
+  | "prose"
+  | "split"
+  | "diagram-first";
+
+export type SectionDensity = "compact" | "balanced" | "immersive";
+
+export type MicroNote = {
+  label: string;
+  value: string;
+};
+
 export type NarrativeSectionSpec = {
   id: string;
   eyebrow?: string;
@@ -122,7 +138,10 @@ export type NarrativeSectionSpec = {
   diagram?: DiagramSpec;
   fullWidthDiagram?: DiagramSpec;
   tone?: "light" | "dark";
-  layout?: "prose" | "split" | "diagram-first";
+  layout?: SectionLayout;
+  density?: SectionDensity;
+  microNotes?: MicroNote[];
+  annotations?: string[];
 };
 
 export type CaseStudyReport = {
@@ -134,6 +153,7 @@ export type CaseStudyReport = {
     narrativeIntro: string;
   };
   heroDiagram?: DiagramSpec;
+  recoveryDiagram?: DiagramSpec;
   sections: NarrativeSectionSpec[];
   engineeringDepth: EngineeringDepthItem[];
   orchestrationCaption?: string;

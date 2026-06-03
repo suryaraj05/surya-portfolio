@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 type SystemProfileBarProps = {
   metrics: SystemMetrics;
   className?: string;
+  variant?: "grid" | "flagship";
 };
 
 const deployTone: Record<SystemMetrics["deploymentStatus"], string> = {
@@ -13,14 +14,40 @@ const deployTone: Record<SystemMetrics["deploymentStatus"], string> = {
   Archived: "text-muted-foreground"
 };
 
-export function SystemProfileBar({ metrics, className }: SystemProfileBarProps) {
+export function SystemProfileBar({ metrics, className, variant = "grid" }: SystemProfileBarProps) {
   const items = [
     { label: "Agents", value: String(metrics.agents) },
     { label: "Services", value: String(metrics.services) },
     { label: "Latency", value: metrics.latency },
-    { label: "Deployment", value: metrics.deploymentStatus },
+    { label: "Deploy", value: metrics.deploymentStatus },
     { label: "Reliability", value: metrics.reliability }
   ];
+
+  if (variant === "flagship") {
+    return (
+      <dl className={cn("report-profile-flagship space-y-0", className)} aria-label="System profile">
+        {items.map((item, i) => (
+          <div
+            key={item.label}
+            className={cn(
+              "flex items-baseline justify-between gap-4 border-b border-border/70 py-4 transition duration-300 hover:border-foreground/20",
+              i === 0 && "border-t"
+            )}
+          >
+            <dt className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">{item.label}</dt>
+            <dd
+              className={cn(
+                "font-display text-sm tracking-tight tabular-nums sm:text-base",
+                item.label === "Deploy" ? deployTone[metrics.deploymentStatus] : "text-foreground"
+              )}
+            >
+              {item.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
 
   return (
     <div
@@ -35,8 +62,8 @@ export function SystemProfileBar({ metrics, className }: SystemProfileBarProps) 
           <dt className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">{item.label}</dt>
           <dd
             className={cn(
-              "mt-1.5 font-display text-sm tracking-tight text-foreground sm:text-base",
-              item.label === "Deployment" ? deployTone[metrics.deploymentStatus] : undefined
+              "mt-1.5 font-display text-sm tracking-tight sm:text-base",
+              item.label === "Deploy" ? deployTone[metrics.deploymentStatus] : undefined
             )}
           >
             {item.value}

@@ -73,13 +73,20 @@ const ENRICHMENTS: Record<string, SlugEnrichment> = {
     sections: [
       {
         id: "context",
-        eyebrow: "01 · Context",
-        title: "Why voice breaks in production",
-        layout: "split",
+        eyebrow: "Chapter I · Context",
+        title: "Why voice interfaces fail in production",
+        layout: "anchored",
+        density: "compact",
         markdown:
           "Most web voice interfaces fail outside demos: selector drift, auth gates, and unconstrained model behavior collapse reliability. Teams either rebuild per-site logic or accept brittle automation.\n\nNINA's thesis is operational — language can be probabilistic, but execution must be contract-bound and policy-checked.",
         pullQuote:
           "The model interprets intent. The resolver owns execution. Guardrails own safety.",
+        microNotes: [
+          { label: "Failure class", value: "Selector drift · auth gates" },
+          { label: "Design stance", value: "Parse ≠ execute" },
+          { label: "Runtime mode", value: "Production voice loop" }
+        ],
+        annotations: ["Operational insight — not a feature list"],
         callouts: [
           {
             tag: "Insight",
@@ -95,18 +102,20 @@ const ENRICHMENTS: Record<string, SlugEnrichment> = {
       },
       {
         id: "response",
-        eyebrow: "02 · Response",
-        title: "Constraining autonomy at the boundary",
-        layout: "prose",
+        eyebrow: "Chapter II · Response",
+        title: "Constraining autonomy at the execution boundary",
+        layout: "dense",
+        density: "balanced",
         markdown:
           "NINA ships as three packages: offline generator (site intelligence), FastAPI decision engine (runtime), and embeddable SDK (capture + DOM execution).\n\nThe SDK never receives free-form tool output — only typed instructions (`navigate`, `search`, `click`, `needs_login`, `no_match`) after guardrails and auth gating.",
         payloads: [NINA_PAYLOAD]
       },
       {
         id: "architecture",
-        eyebrow: "03 · Architecture",
-        title: "Three-plane system topology",
-        layout: "diagram-first",
+        eyebrow: "Chapter III · Architecture",
+        title: "Multi-layer control plane topology",
+        layout: "visual-led",
+        density: "immersive",
         tone: "dark",
         markdown:
           "Control flow is policy-first: validate → rate-limit → load site contract → parse → resolve → safety checks → auth gate → return instruction. On selector failure, the SDK reports upstream and receives a recovery instruction from a failure decision matrix.",
@@ -201,12 +210,19 @@ const ENRICHMENTS: Record<string, SlugEnrichment> = {
         markdown:
           "Creative teams lose weeks reconciling spreadsheets, storyboards, and ad-hoc AI outputs. VisionSync treats the shot plan as the canonical artifact — every agent output must land in a reviewable structure.",
         pullQuote: "Generative novelty is cheap. Reviewable structure is the product.",
-        layout: "split"
+        layout: "anchored",
+        density: "compact",
+        microNotes: [
+          { label: "Canonical artifact", value: "Shot board" },
+          { label: "Review gate", value: "Human approval required" }
+        ]
       },
       {
         id: "response",
-        eyebrow: "02 · Response",
+        eyebrow: "Chapter II · Response",
         title: "Structured planning as the product",
+        layout: "dense",
+        density: "balanced",
         markdown:
           "Ingest briefs and references, decompose into scenes, generate shot lists with lens and duration metadata, and route through human approval gates before export.",
         payloads: [VISION_PAYLOAD]
@@ -215,7 +231,8 @@ const ENRICHMENTS: Record<string, SlugEnrichment> = {
         id: "architecture",
         eyebrow: "03 · Architecture",
         title: "Multi-agent planning pipeline",
-        layout: "diagram-first",
+        layout: "visual-led",
+        density: "immersive",
         tone: "dark",
         markdown:
           "Specialist agents handle breakdown, visual references, and shot grammar. A coordinator enforces schema validity and blocks downstream handoff until review status is green."
@@ -255,12 +272,19 @@ const ENRICHMENTS: Record<string, SlugEnrichment> = {
         markdown:
           "Tax products often optimize for conversational UX while under-investing in validation topology. TaxSetu models filing as a directed graph with explicit gates before any handoff to e-filing adapters.",
         pullQuote: "Correctness is a graph problem — not a prompt problem.",
-        layout: "split"
+        layout: "anchored",
+        density: "compact",
+        microNotes: [
+          { label: "Topology", value: "Directed validation graph" },
+          { label: "Escalation", value: "Human edge · first-class" }
+        ]
       },
       {
         id: "response",
-        eyebrow: "02 · Response",
+        eyebrow: "Chapter II · Response",
         title: "Gate-first orchestration",
+        layout: "dense",
+        density: "balanced",
         markdown:
           "Agents prepare sections; validators enforce caps, consistency rules, and form applicability; orchestration only commits when all gates pass.",
         payloads: [TAX_PAYLOAD]
@@ -269,7 +293,8 @@ const ENRICHMENTS: Record<string, SlugEnrichment> = {
         id: "architecture",
         eyebrow: "03 · Architecture",
         title: "Compliance-bound agent graph",
-        layout: "diagram-first",
+        layout: "visual-led",
+        density: "immersive",
         tone: "dark",
         markdown:
           "Specialist agents for income, deductions, and form selection feed a coordinator that cannot bypass validation nodes. Human escalation is a first-class edge, not an error state."

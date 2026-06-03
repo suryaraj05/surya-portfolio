@@ -8,19 +8,21 @@ import { getHeroDiagramForSlug } from "@/lib/case-study/diagrams";
 
 import { DarkInversionBand } from "./DarkInversionBand";
 import { FullWidthDiagram } from "./FullWidthDiagram";
+import { ReportReveal } from "./ReportMotion";
 
 export function ReportDecisions({ decisions }: { decisions: DecisionItem[] }) {
   if (!decisions.length) return null;
 
   return (
-    <section className="report-section py-section-tight">
+    <section className="report-section py-12 md:py-14">
       <Container>
+        <ReportReveal>
         <Stack size="lg">
           <div className="max-w-prose">
-            <p className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">04 · Decisions</p>
-            <Heading as="h2" size="md" className="mt-3 text-[clamp(1.45rem,2.4vw,2rem)]">
+            <p className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">Chapter IV · Decisions</p>
+            <h2 className="mt-3 font-display text-[clamp(1.55rem,2.8vw,2.25rem)] tracking-[-0.02em]">
               Design decisions under constraint
-            </Heading>
+            </h2>
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
             {decisions.map((d) => (
@@ -42,6 +44,7 @@ export function ReportDecisions({ decisions }: { decisions: DecisionItem[] }) {
             ))}
           </div>
         </Stack>
+        </ReportReveal>
       </Container>
     </section>
   );
@@ -51,7 +54,7 @@ export function ReportTradeoffs({ items }: { items: TradeoffItem[] }) {
   if (!items.length) return null;
 
   return (
-    <section className="report-section border-b border-border/50 py-section-tight">
+    <section className="report-section border-b border-border/40 py-10 md:py-12">
       <Container>
         <p className="text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">Trade-offs</p>
         <Heading as="h2" size="md" className="mt-3 text-[clamp(1.35rem,2vw,1.85rem)]">

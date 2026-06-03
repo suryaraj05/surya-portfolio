@@ -2,13 +2,14 @@ import type { ProjectDTO } from "@/src/contracts/types";
 import type { CaseStudyContent, ProjectNavItem } from "@/lib/case-study/types";
 
 import { MediaGallery } from "@/components/case-study/MediaGallery";
-import { RelatedProjects } from "@/components/case-study/RelatedProjects";
-import { ProjectNavigation } from "@/components/case-study/ProjectNavigation";
 import {
   CaseStudyReportHero,
   EngineeringDepthBand,
   ReportNarrativeSection
 } from "@/components/case-study/report";
+import { FullWidthDiagram } from "@/components/case-study/report/FullWidthDiagram";
+import { ReportContinueReading } from "@/components/case-study/report/ReportContinueReading";
+import { ReportProjectNav } from "@/components/case-study/report/ReportProjectNav";
 import {
   OrchestrationVisual,
   ReportDecisions,
@@ -44,7 +45,7 @@ function mapMedia(project: ProjectDTO, content?: Partial<CaseStudyContent>) {
 }
 
 /**
- * Premium engineering report layout for project detail pages only.
+ * Elite editorial engineering report — project detail pages only.
  */
 export function CaseStudyDocument({
   project,
@@ -58,26 +59,30 @@ export function CaseStudyDocument({
   const media = mapMedia(project, content);
 
   return (
-    <article className="case-study-report w-full animate-fade-in motion-reduce:animate-none">
+    <article className="case-study-report case-study-report-elite w-full">
       <CaseStudyReportHero
+        slug={report.slug}
         title={report.hero.title}
         subtitle={report.hero.subtitle}
         narrativeIntro={report.hero.narrativeIntro}
         kicker={report.hero.kicker}
         systemProfile={systemProfile}
-        heroDiagram={report.heroDiagram}
       />
+
+      {report.heroDiagram ? (
+        <FullWidthDiagram spec={report.heroDiagram} className="border-b border-border/50" />
+      ) : null}
 
       {report.sections.map((section, index) => (
         <ReportNarrativeSection key={section.id} section={section} index={index} />
       ))}
 
       {report.orchestrationCaption &&
-      !report.sections.some((s) => s.layout === "diagram-first") ? (
+      !report.sections.some((s) => s.layout === "visual-led") ? (
         <OrchestrationVisual slug={report.slug} caption={report.orchestrationCaption} />
       ) : null}
 
-      <EngineeringDepthBand items={report.engineeringDepth} />
+      <EngineeringDepthBand items={report.engineeringDepth} recoveryDiagram={report.recoveryDiagram} />
 
       <ReportDecisions decisions={report.decisions} />
 
@@ -88,7 +93,7 @@ export function CaseStudyDocument({
       <ReportOutcomeMetrics metrics={report.outcomeMetrics} />
 
       {media ? (
-        <section className="report-section py-section-tight">
+        <section className="report-section py-12">
           <div className="mx-auto w-full max-w-layout px-content-x">
             <MediaGallery spec={media} />
           </div>
@@ -100,16 +105,10 @@ export function CaseStudyDocument({
       ) : null}
 
       {relatedProjects?.length ? (
-        <div className="report-section border-t border-border/60 py-section-tight">
-          <RelatedProjects projects={relatedProjects} currentSlug={project.slug} />
-        </div>
+        <ReportContinueReading projects={relatedProjects} currentSlug={project.slug} />
       ) : null}
 
-      {previousProject || nextProject ? (
-        <div className="border-t border-border/60">
-          <ProjectNavigation previous={previousProject} next={nextProject} />
-        </div>
-      ) : null}
+      <ReportProjectNav previous={previousProject} next={nextProject} />
     </article>
   );
 }

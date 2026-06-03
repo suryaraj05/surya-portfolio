@@ -5,10 +5,16 @@ import type {
   DecisionItem,
   MetricItem,
   NarrativeSectionSpec,
+  SectionLayout,
   TechItem,
   TradeoffItem
 } from "@/lib/case-study/types";
-import { getHeroDiagramForSlug, getSectionDiagramForSlug } from "@/lib/case-study/diagrams";
+import {
+  getConfidenceRoutingDiagram,
+  getHeroDiagramForSlug,
+  getRecoveryFlowDiagram,
+  getSectionDiagramForSlug
+} from "@/lib/case-study/diagrams";
 import {
   getDefaultDepth,
   getDefaultEditorialTitles,
@@ -20,18 +26,33 @@ function hasText(value?: string | null): value is string {
   return Boolean(value && value.trim().length > 0);
 }
 
+function normalizeLayout(layout?: SectionLayout): SectionLayout {
+  if (layout === "split") return "anchored";
+  if (layout === "diagram-first") return "visual-led";
+  return layout ?? "prose";
+}
+
+function enrichSection(project: ProjectDTO, section: NarrativeSectionSpec): NarrativeSectionSpec {
+  const layout = normalizeLayout(section.layout);
+  const isVisual = layout === "visual-led";
+
+  return {
+    ...section,
+    layout,
+    fullWidthDiagram:
+      section.fullWidthDiagram ?? (isVisual ? getSectionDiagramForSlug(project.slug, section.id) : undefined),
+    diagram:
+      section.diagram ??
+      (section.id === "response" ? getConfidenceRoutingDiagram(project.slug) : getSectionDiagramForSlug(project.slug, section.id))
+  };
+}
+
 function buildSectionsFromProject(
   project: ProjectDTO,
   enrichment: ReturnType<typeof getSlugEnrichment>
 ): NarrativeSectionSpec[] {
   if (enrichment?.sections?.length) {
-    return enrichment.sections.map((section) => ({
-      ...section,
-      fullWidthDiagram:
-        section.fullWidthDiagram ??
-        (section.layout === "diagram-first" ? getSectionDiagramForSlug(project.slug, section.id) : undefined),
-      diagram: section.diagram ?? getSectionDiagramForSlug(project.slug, section.id)
-    }));
+    return enrichment.sections.map((section) => enrichSection(project, section));
   }
 
   const titles = { ...getDefaultEditorialTitles(), ...enrichment?.editorialTitles };
@@ -43,7 +64,8 @@ function buildSectionsFromProject(
       eyebrow: "01 · Context",
       title: titles.problem ?? "Operational context",
       markdown: project.problem!.trim(),
-      layout: "split",
+      layout: "anchored",
+      density: "compact",
       pullQuote: enrichment?.narrativeIntro
         ? undefined
         : "Reliability is designed at the boundary between interpretation and execution."
@@ -56,23 +78,25 @@ function buildSectionsFromProject(
       eyebrow: "02 · Response",
       title: titles.solution ?? "Engineering response",
       markdown: project.solution!.trim(),
-      layout: "prose"
+      layout: "dense",
+      density: "balanced"
     });
   }
 
   if (hasText(project.architecture)) {
     sections.push({
       id: "architecture",
-      eyebrow: "03 · Architecture",
+      eyebrow: "Chapter III · Architecture",
       title: titles.architecture ?? "Control plane architecture",
       markdown: project.architecture!.trim(),
-      layout: "diagram-first",
+      layout: "visual-led",
+      density: "immersive",
       tone: "dark",
       fullWidthDiagram: getSectionDiagramForSlug(project.slug, "architecture")
     });
   }
 
-  return sections;
+  return sections.map((s) => enrichSection(project, s));
 }
 
 function mapTechStack(project: ProjectDTO, content?: Partial<CaseStudyContent>): TechItem[] {
@@ -98,8 +122,11 @@ export function resolveCaseStudyReport(
   const decisions: DecisionItem[] = enrichment?.decisions ?? content?.decisions ?? [];
   const tradeoffs: TradeoffItem[] = enrichment?.tradeoffs ?? content?.tradeoffs ?? [];
 
+  const recoveryDiagram = getRecoveryFlowDiagram(project.slug);
+
   return {
     slug: project.slug,
+    recoveryDiagram,
     hero: {
       title: project.title,
       subtitle: content?.hero?.subtitle ?? project.short_description ?? undefined,
