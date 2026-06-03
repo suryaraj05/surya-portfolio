@@ -30,7 +30,7 @@ export function RelatedProjects({
               key={p.slug}
               className="rounded-xl border border-border bg-background p-6 not-prose transition hover:opacity-95"
             >
-              <Link href={p.slug ? `/case-studies/${p.slug}` : "/case-studies"} className="block">
+              <Link href={p.slug ? `/projects/${p.slug}` : "/projects"} className="block">
                 <div className="text-lg font-display tracking-tight">{p.title}</div>
                 {p.short_description ? (
                   <Text tone="muted" size="sm" className="mt-2">
