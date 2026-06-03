@@ -13,7 +13,8 @@ const config: Config = {
         primary: "hsl(var(--primary))",
         "primary-foreground": "hsl(var(--primary-foreground))",
         accent: "hsl(var(--accent))",
-        "accent-foreground": "hsl(var(--accent-foreground))"
+        "accent-foreground": "hsl(var(--accent-foreground))",
+        signal: "hsl(var(--signal))"
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
@@ -27,7 +28,9 @@ const config: Config = {
       },
       maxWidth: {
         prose: "72ch",
-        layout: "1200px"
+        layout: "1280px",
+        editorial: "44rem",
+        wide: "56rem"
       },
       borderRadius: {
         lg: "0.9rem",

@@ -1,48 +1,46 @@
 import Link from "next/link";
 
+import { SystemMotif } from "@/components/editorial/SystemMotif";
 import { Container } from "@/components/layout/container";
-import type { CaseStudyKicker } from "@/lib/case-study/types";
 import type { SystemMetrics } from "@/lib/project-metrics";
 
 type CaseStudyReportHeroProps = {
   title: string;
   subtitle?: string;
   narrativeIntro: string;
-  kicker?: CaseStudyKicker[];
   systemProfile: SystemMetrics;
 };
 
-export function CaseStudyReportHero({
-  title,
-  subtitle,
-  narrativeIntro,
-  systemProfile
-}: CaseStudyReportHeroProps) {
+export function CaseStudyReportHero({ title, subtitle, narrativeIntro, systemProfile }: CaseStudyReportHeroProps) {
   const profileLine = [
     `${systemProfile.agents} agents`,
     `${systemProfile.services} services`,
     systemProfile.latency,
-    systemProfile.deploymentStatus,
-    systemProfile.reliability
+    systemProfile.deploymentStatus
   ].join(" · ");
 
   return (
-    <header className="border-b border-border/40">
-      <Container className="py-14 md:py-20">
-        <article className="report-read mx-auto">
-          <Link
-            href="/projects"
-            className="text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground transition hover:text-foreground"
-          >
-            ← Engineering reports
-          </Link>
-          <h1 className="mt-10 font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] tracking-[-0.03em]">
-            {title}
-          </h1>
-          {subtitle ? <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{subtitle}</p> : null}
-          <p className="mt-8 text-[1.05rem] leading-[1.85] text-foreground/90">{narrativeIntro}</p>
-          <p className="mt-10 font-mono text-[0.72rem] leading-relaxed text-muted-foreground">{profileLine}</p>
-        </article>
+    <header className="report-hero-cinematic">
+      <div className="sys-atmosphere pointer-events-none absolute inset-0" aria-hidden />
+      <div className="sys-topology-field pointer-events-none absolute inset-0 opacity-50" aria-hidden />
+      <Container className="relative py-[clamp(4rem,12vw,8rem)]">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_200px] lg:items-end">
+          <article className="report-read mx-auto lg:mx-0">
+            <Link href="/projects" className="sys-meta transition hover:text-foreground">
+              ← Systems index
+            </Link>
+            <p className="sys-meta mt-8 sys-meta-signal">Engineering report · {profileLine}</p>
+            <h1 className="mt-8 font-display text-[clamp(2.5rem,5.5vw,4rem)] leading-[1.04] tracking-[-0.04em]">
+              {title}
+            </h1>
+            {subtitle ? <p className="mt-6 text-lg text-muted-foreground">{subtitle}</p> : null}
+            <p className="editorial-signature mt-8">A flagship infrastructure case study.</p>
+            <p className="mt-8 text-[1.05rem] leading-[1.85] text-foreground/90">{narrativeIntro}</p>
+          </article>
+          <div className="hidden lg:block">
+            <SystemMotif variant="compact" />
+          </div>
+        </div>
       </Container>
     </header>
   );

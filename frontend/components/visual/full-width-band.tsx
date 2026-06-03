@@ -13,7 +13,7 @@ export function FullWidthBand({ children, className, tone = "muted" }: FullWidth
     <section
       className={cn(
         "relative overflow-hidden py-[clamp(3.5rem,8vw,6.5rem)]",
-        tone === "muted" ? "bg-muted/50" : "bg-accent/40",
+        tone === "muted" ? "bg-muted/30" : "bg-accent/25",
         className
       )}
     >

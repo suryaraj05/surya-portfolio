@@ -3,17 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222 24% 12%;
-  --muted: 220 20% 97%;
-  --muted-foreground: 220 10% 45%;
-  --border: 220 14% 90%;
-  --primary: 222 50% 14%;
+  --background: 40 20% 99%;
+  --foreground: 222 22% 9%;
+  --muted: 220 16% 96%;
+  --muted-foreground: 220 9% 42%;
+  --border: 220 12% 88%;
+  --primary: 222 22% 9%;
   --primary-foreground: 0 0% 100%;
-  --accent: 216 36% 95%;
-  --accent-foreground: 222 40% 20%;
-  --font-sans: "Inter";
-  --font-display: "Inter";
+  --accent: 220 14% 94%;
+  --accent-foreground: 222 20% 14%;
+  --signal: 215 18% 38%;
+  --font-sans: var(--font-inter, "Inter"), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter, "Inter"), ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
@@ -33,7 +34,8 @@ html {
 
 body {
   @apply bg-background text-foreground antialiased;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 @layer base {
@@ -41,81 +43,140 @@ body {
   h2,
   h3,
   h4 {
-    @apply font-display tracking-tight;
+    @apply font-display tracking-tight text-foreground;
   }
 }
 
 @layer components {
-  /* Subtle atmospheric hero — no heavy gradients */
-  .hero-atmosphere {
+  /* —— SuryaOS signature: systems topology atmosphere —— */
+  .sys-atmosphere {
     background:
-      radial-gradient(ellipse 80% 55% at 12% -8%, hsl(var(--accent) / 0.55), transparent 58%),
-      radial-gradient(ellipse 60% 45% at 88% 12%, hsl(220 20% 96% / 0.9), transparent 52%),
-      linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.35) 100%);
+      radial-gradient(ellipse 70% 50% at 0% 0%, hsl(var(--accent) / 0.9), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 100% 20%, hsl(220 14% 92% / 0.8), transparent 50%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.4));
   }
 
-  /* Architectural textures — extremely low opacity */
-  .arch-texture {
-    pointer-events: none;
+  .sys-topology-field {
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, black 20%, transparent 75%);
+  }
+
+  .sys-meta {
+    @apply font-mono text-[0.68rem] uppercase tracking-[0.2em] text-muted-foreground;
+  }
+
+  .sys-meta-signal {
+    color: hsl(var(--signal) / 0.85);
+  }
+
+  .editorial-signature {
+    @apply font-display text-[clamp(1.15rem,2vw,1.45rem)] italic leading-snug tracking-[-0.01em] text-foreground/75;
+  }
+
+  .editorial-hero-title {
+    @apply font-display text-[clamp(2.75rem,7vw,5.25rem)] font-medium leading-[1.02] tracking-[-0.04em] text-foreground;
+  }
+
+  .editorial-cta-primary {
+    @apply font-medium text-foreground underline-offset-4 transition hover:underline;
+  }
+
+  .editorial-cta-secondary {
+    @apply text-muted-foreground underline-offset-4 transition hover:text-foreground hover:underline;
+  }
+
+  .editorial-section-eyebrow {
+    @apply sys-meta mb-6 block;
+  }
+
+  .editorial-section-title {
+    @apply font-display text-[clamp(1.85rem,3.5vw,2.75rem)] leading-[1.08] tracking-[-0.03em];
+  }
+
+  .editorial-pull {
+    @apply border-l border-foreground/15 pl-6 font-display text-[clamp(1.35rem,2.5vw,1.85rem)] leading-[1.25] tracking-[-0.02em] text-foreground/90;
+  }
+
+  .editorial-list-item {
+    @apply relative py-3 pl-6 text-base leading-relaxed text-foreground/90;
+  }
+
+  .editorial-list-item::before {
+    content: "›";
+    @apply absolute left-0 font-mono text-sm text-muted-foreground;
+  }
+
+  /* Cinematic full-bleed — sparse use */
+  .sys-cinematic-band {
+    @apply relative overflow-hidden bg-[hsl(222,22%,7%)] text-white;
+  }
+
+  .sys-cinematic-band .sys-meta {
+    @apply text-white/45;
+  }
+
+  .sys-cinematic-band .editorial-section-title {
+    @apply text-white;
+  }
+
+  .sys-cinematic-band .editorial-pull {
+    @apply border-white/20 text-white/90;
+  }
+
+  .sys-cinematic-band .editorial-list-item {
+    @apply text-white/75;
+  }
+
+  .sys-cinematic-band .editorial-list-item::before {
+    @apply text-white/35;
+  }
+
+  .sys-cinematic-band .sys-topology-field {
+    background-image:
+      linear-gradient(hsl(0 0% 100% / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.04) 1px, transparent 1px);
+    opacity: 0.5;
+  }
+
+  /* Legacy aliases — topology textures */
+  .hero-atmosphere {
+    @apply sys-atmosphere;
   }
 
   .arch-texture-grid {
-    background-image:
-      linear-gradient(hsl(var(--foreground) / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--foreground) / 0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: linear-gradient(180deg, black 0%, transparent 85%);
-  }
-
-  .arch-texture-dots {
-    background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
-    background-size: 14px 14px;
+    @apply sys-topology-field;
   }
 
   .arch-texture-lines {
     background-image: repeating-linear-gradient(
-      -12deg,
+      -14deg,
       transparent,
-      transparent 40px,
-      hsl(var(--foreground) / 0.025) 40px,
-      hsl(var(--foreground) / 0.025) 41px
+      transparent 48px,
+      hsl(var(--foreground) / 0.02) 48px,
+      hsl(var(--foreground) / 0.02) 49px
     );
-    opacity: 0.7;
   }
 
   .editorial-hover {
-    @apply transition-[transform,box-shadow,border-color] duration-300 ease-out;
+    @apply transition-opacity duration-300 ease-editorial;
   }
 
   .editorial-hover:hover {
-    @apply -translate-y-px;
-  }
-
-  .image-reveal {
-    @apply transition-transform duration-700 ease-out;
-  }
-
-  .group:hover .image-reveal {
-    @apply scale-[1.02];
-  }
-
-  .stat-card {
-    @apply border-l border-border/90 pl-5 transition-[border-color,transform] duration-300 ease-out;
-  }
-
-  .stat-card:hover {
-    @apply border-foreground/25 -translate-y-0.5;
+    @apply opacity-80;
   }
 
   .link-premium {
-    @apply relative inline-flex items-center gap-2 transition-[transform,color] duration-300 ease-out;
+    @apply inline-flex items-center gap-2 font-medium transition-[transform,color] duration-300 ease-editorial;
   }
 
   .link-premium:hover {
     @apply translate-x-0.5 text-foreground;
   }
 
-  /* Editorial case study (project detail only) — calm reading column */
+  /* Case study report */
   .report-read {
     max-width: 42rem;
   }
@@ -142,5 +203,27 @@ body {
 
   .report-transition + .report-pull-quote {
     @apply mt-0;
+  }
+
+  /* Project report cinematic hero */
+  .report-hero-cinematic {
+    @apply relative overflow-hidden border-b border-border/25;
+  }
+
+  .report-hero-cinematic .sys-atmosphere {
+    opacity: 0.7;
+  }
+
+  .report-cinematic-moment {
+    @apply relative my-16 overflow-hidden py-14;
+  }
+
+  .report-cinematic-moment::before {
+    content: "";
+    @apply absolute inset-y-0 left-1/2 w-screen -translate-x-1/2 bg-[hsl(222,20%,8%)] pointer-events-none;
+  }
+
+  .report-cinematic-moment > * {
+    @apply relative;
   }
 }
