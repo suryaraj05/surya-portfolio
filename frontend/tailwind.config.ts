@@ -20,7 +20,9 @@ const config: Config = {
         display: ["var(--font-display)", "var(--font-sans)", "sans-serif"]
       },
       spacing: {
-        "section-y": "clamp(4rem, 8vw, 8rem)",
+        "section-y": "clamp(4.5rem, 9vw, 8.5rem)",
+        "section-tight": "clamp(3rem, 6vw, 5.5rem)",
+        "section-loose": "clamp(5.5rem, 11vw, 10rem)",
         "content-x": "clamp(1rem, 4vw, 3rem)"
       },
       maxWidth: {
@@ -33,12 +35,25 @@ const config: Config = {
       },
       keyframes: {
         "fade-up": {
-          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" }
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" }
+        },
+        "reveal-soft": {
+          "0%": { opacity: "0.85", transform: "scale(0.985)" },
+          "100%": { opacity: "1", transform: "scale(1)" }
         }
       },
       animation: {
-        "fade-up": "fade-up 0.45s ease-out both"
+        "fade-up": "fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
+        "fade-in": "fade-in 0.5s ease-out both",
+        "reveal-soft": "reveal-soft 0.7s cubic-bezier(0.22, 1, 0.36, 1) both"
+      },
+      transitionTimingFunction: {
+        editorial: "cubic-bezier(0.22, 1, 0.36, 1)"
       }
     }
   },

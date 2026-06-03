@@ -22,6 +22,13 @@
 
 html {
   font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -35,5 +42,76 @@ body {
   h3,
   h4 {
     @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  /* Subtle atmospheric hero — no heavy gradients */
+  .hero-atmosphere {
+    background:
+      radial-gradient(ellipse 80% 55% at 12% -8%, hsl(var(--accent) / 0.55), transparent 58%),
+      radial-gradient(ellipse 60% 45% at 88% 12%, hsl(220 20% 96% / 0.9), transparent 52%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.35) 100%);
+  }
+
+  /* Architectural textures — extremely low opacity */
+  .arch-texture {
+    pointer-events: none;
+  }
+
+  .arch-texture-grid {
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(180deg, black 0%, transparent 85%);
+  }
+
+  .arch-texture-dots {
+    background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  .arch-texture-lines {
+    background-image: repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 40px,
+      hsl(var(--foreground) / 0.025) 40px,
+      hsl(var(--foreground) / 0.025) 41px
+    );
+    opacity: 0.7;
+  }
+
+  .editorial-hover {
+    @apply transition-[transform,box-shadow,border-color] duration-300 ease-out;
+  }
+
+  .editorial-hover:hover {
+    @apply -translate-y-px;
+  }
+
+  .image-reveal {
+    @apply transition-transform duration-700 ease-out;
+  }
+
+  .group:hover .image-reveal {
+    @apply scale-[1.02];
+  }
+
+  .stat-card {
+    @apply border-l border-border/90 pl-5 transition-[border-color,transform] duration-300 ease-out;
+  }
+
+  .stat-card:hover {
+    @apply border-foreground/25 -translate-y-0.5;
+  }
+
+  .link-premium {
+    @apply relative inline-flex items-center gap-2 transition-[transform,color] duration-300 ease-out;
+  }
+
+  .link-premium:hover {
+    @apply translate-x-0.5 text-foreground;
   }
 }

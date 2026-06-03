@@ -5,6 +5,8 @@ import { Section } from "@/components/layout/section";
 import { Stack } from "@/components/layout/stack";
 import { Heading } from "@/components/typography/heading";
 import { Text } from "@/components/typography/text";
+import { HeroAtmosphere } from "@/components/visual/hero-atmosphere";
+import { ProjectPreviewCard } from "@/components/visual/project-preview-card";
 import { fetchProjects } from "@/lib/api/endpoints";
 import { buildMetadata } from "@/lib/seo/metadata";
 import type { ProjectDTO } from "@/src/contracts/types";
@@ -23,12 +25,6 @@ export const metadata: Metadata = buildMetadata({
   path: "/projects"
 });
 
-function compact(text?: string | null, fallback = "Not specified"): string {
-  if (!text || !text.trim()) return fallback;
-  const normalized = text.replace(/\s+/g, " ").trim();
-  return normalized.length > 220 ? `${normalized.slice(0, 217)}...` : normalized;
-}
-
 function toApiFeatured(value?: "all" | "true" | "false"): string | undefined {
   if (!value || value === "all") return undefined;
   return value;
@@ -46,58 +42,17 @@ function toNavParams(
   return out;
 }
 
-function ProjectEditorialRow({ project }: { project: ProjectDTO }) {
-  return (
-    <article className="border-b border-border pb-12 pt-10 first:pt-2">
-      <Stack size="md" className="max-w-prose">
-        <Heading as="h2" size="md" className="text-[clamp(1.4rem,2.2vw,2rem)]">
-          <Link
-            href={`/projects/${project.slug}`}
-            className="underline-offset-4 hover:underline focus-visible:underline"
-          >
-            {project.title}
-          </Link>
-        </Heading>
-
-        <Text tone="muted" size="lg">
-          {compact(project.short_description, "Engineering system case study.")}
-        </Text>
-
-        <div className="grid gap-6 pt-2 sm:grid-cols-2">
-          <div>
-            <p className="mb-2 text-sm uppercase tracking-[0.08em] text-muted-foreground">Challenge</p>
-            <Text size="sm">{compact(project.problem, "Challenge details are documented in the full case study.")}</Text>
-          </div>
-          <div>
-            <p className="mb-2 text-sm uppercase tracking-[0.08em] text-muted-foreground">Outcome</p>
-            <Text size="sm">{compact(project.solution, "Outcome details are documented in the full case study.")}</Text>
-          </div>
-        </div>
-      </Stack>
-    </article>
-  );
-}
-
 function FeaturedSystems({ projects }: { projects: ProjectDTO[] }) {
   if (!projects.length) return null;
   return (
-    <Section className="pt-[clamp(2.5rem,6vw,5rem)]">
-      <Stack size="lg">
-        <Heading as="h2" size="md" className="text-2xl">
+    <Section rhythm="tight" className="pt-0">
+      <Stack size="xl">
+        <Heading as="h2" size="md" className="text-[clamp(1.65rem,2.5vw,2.25rem)]">
           Featured Engineering Systems
         </Heading>
-        <div className="space-y-8">
-          {projects.map((project) => (
-            <article key={project.slug} className="max-w-prose border-l border-border pl-5">
-              <Heading as="h3" size="sm" className="text-xl">
-                <Link href={`/projects/${project.slug}`} className="underline-offset-4 hover:underline">
-                  {project.title}
-                </Link>
-              </Heading>
-              <Text tone="muted" size="md" className="mt-2">
-                {compact(project.short_description, "Engineering system case study.")}
-              </Text>
-            </article>
+        <div className="not-prose">
+          {projects.map((project, index) => (
+            <ProjectPreviewCard key={project.slug} project={project} index={index} variant="featured" />
           ))}
         </div>
       </Stack>
@@ -136,36 +91,40 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   const projects = listResponse.data.items;
   const featuredProjects = featuredResponse.data.items;
+  const showFeaturedBlock = featured === "all" && !q;
 
   return (
     <>
-      <Section className="pt-[clamp(2.5rem,7vw,6rem)]">
+      <HeroAtmosphere kicker="Systems Index">
         <Stack size="lg" className="max-w-prose">
           <Heading as="h1" size="lg">
             Engineering Systems
           </Heading>
-          <Text tone="muted" size="lg">
+          <Text tone="muted" size="lg" className="leading-relaxed">
             A living index of product and infrastructure systems, documented as engineering case studies.
           </Text>
 
-          <form method="get" className="not-prose mt-4 grid gap-4 rounded-xl border border-border bg-background p-5 sm:grid-cols-[1fr_180px_180px_auto] sm:items-end">
+          <form
+            method="get"
+            className="not-prose mt-6 grid gap-4 rounded-xl border border-border/80 bg-background/90 p-5 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.35)] transition duration-300 hover:border-border sm:grid-cols-[1fr_180px_180px_auto] sm:items-end"
+          >
             <label className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">Search</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.12em] text-muted-foreground">Search</span>
               <input
                 type="search"
                 name="q"
                 defaultValue={q}
                 placeholder="Search systems, challenges, outcomes..."
-                className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-primary/40 focus:ring-2"
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-primary/40 transition focus:ring-2"
               />
             </label>
 
             <label className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">Featured</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.12em] text-muted-foreground">Featured</span>
               <select
                 name="featured"
                 defaultValue={featured}
-                className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-primary/40 focus:ring-2"
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-primary/40 transition focus:ring-2"
               >
                 <option value="all">All</option>
                 <option value="true">Featured only</option>
@@ -174,11 +133,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             </label>
 
             <label className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">Status</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.12em] text-muted-foreground">Status</span>
               <select
                 name="status"
                 defaultValue={status}
-                className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-primary/40 focus:ring-2"
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-primary/40 transition focus:ring-2"
               >
                 <option value="published">Published</option>
                 <option value="draft">Draft</option>
@@ -190,7 +149,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
+                className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition duration-300 hover:-translate-y-px"
               >
                 Apply
               </button>
@@ -199,26 +158,26 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                   pathname: "/projects",
                   query: toNavParams(undefined, "all", "published")
                 }}
-                className="inline-flex h-10 items-center rounded-lg border border-border px-4 text-sm"
+                className="inline-flex h-10 items-center rounded-lg border border-border/90 px-4 text-sm transition duration-300 hover:-translate-y-px"
               >
                 Reset
               </Link>
             </div>
           </form>
         </Stack>
-      </Section>
+      </HeroAtmosphere>
 
-      <FeaturedSystems projects={featuredProjects} />
+      {showFeaturedBlock ? <FeaturedSystems projects={featuredProjects} /> : null}
 
-      <Section className="pt-[clamp(2.5rem,6vw,5rem)]">
-        <Stack size="lg">
-          <Heading as="h2" size="md" className="text-2xl">
-            All Systems
+      <Section rhythm="tight" className={showFeaturedBlock ? "pt-0" : undefined}>
+        <Stack size="xl">
+          <Heading as="h2" size="md" className="text-[clamp(1.65rem,2.5vw,2.25rem)]">
+            {showFeaturedBlock ? "All Systems" : "Systems"}
           </Heading>
           {projects.length ? (
             <div className="not-prose">
-              {projects.map((project) => (
-                <ProjectEditorialRow key={project.id} project={project} />
+              {projects.map((project, index) => (
+                <ProjectPreviewCard key={project.id} project={project} index={index} variant="list" />
               ))}
             </div>
           ) : (
@@ -229,4 +188,3 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     </>
   );
 }
-

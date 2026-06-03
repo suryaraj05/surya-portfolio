@@ -6,10 +6,10 @@ import type { HTMLAttributes } from "react";
 const headingVariants = cva("font-display tracking-tight text-foreground", {
   variants: {
     size: {
-      xl: "text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.05]",
-      lg: "text-[clamp(2rem,4vw,3.5rem)] leading-[1.08]",
-      md: "text-[clamp(1.5rem,2vw,2rem)] leading-[1.15]",
-      sm: "text-xl leading-tight"
+      xl: "text-[clamp(2.75rem,5.5vw,4.75rem)] leading-[1.04] tracking-[-0.02em]",
+      lg: "text-[clamp(2.1rem,4.2vw,3.6rem)] leading-[1.07] tracking-[-0.015em]",
+      md: "text-[clamp(1.55rem,2.4vw,2.15rem)] leading-[1.12] tracking-[-0.01em]",
+      sm: "text-[clamp(1.125rem,1.5vw,1.35rem)] leading-snug"
     }
   },
   defaultVariants: {
