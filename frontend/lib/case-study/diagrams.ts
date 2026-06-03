@@ -26,23 +26,27 @@ function compactTopology(slug: string): string {
   if (slugKind(slug) === "nina") {
     return `
       <text x="24" y="28" fill="currentColor" font-size="9" stroke="none" opacity="0.45" letter-spacing="0.1em">VOICE CONTROL PLANE</text>
+      <text x="600" y="28" fill="currentColor" font-size="8" stroke="none" opacity="0.4">— execution boundary</text>
       <rect x="24" y="44" width="752" height="56" rx="8" stroke-opacity="0.15" fill="currentColor" fill-opacity="0.02"/>
-      <text x="40" y="78" fill="currentColor" font-size="9" stroke="none" opacity="0.55">SDK · capture · execute</text>
-      <rect x="24" y="112" width="752" height="72" rx="8" stroke-opacity="0.2" fill="currentColor" fill-opacity="0.03"/>
+      <text x="40" y="78" fill="currentColor" font-size="9" stroke="none" opacity="0.55">client plane · SDK</text>
+      <rect x="24" y="112" width="752" height="72" rx="8" stroke-opacity="0.22" fill="currentColor" fill-opacity="0.03"/>
       <rect x="44" y="128" width="88" height="40" rx="6" stroke-opacity="0.25"/>
       <rect x="148" y="128" width="88" height="40" rx="6" stroke-opacity="0.25"/>
-      <rect x="252" y="128" width="120" height="40" rx="6" fill="currentColor" fill-opacity="0.05" stroke-opacity="0.3"/>
+      <rect x="252" y="128" width="120" height="40" rx="6" fill="currentColor" fill-opacity="0.07" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.4"/>
       <rect x="388" y="128" width="88" height="40" rx="6" stroke-opacity="0.25"/>
       <rect x="492" y="128" width="100" height="40" rx="6" stroke-opacity="0.25"/>
       <text x="56" y="154" fill="currentColor" font-size="8" stroke="none" opacity="0.65">parse</text>
       <text x="160" y="154" fill="currentColor" font-size="8" stroke="none" opacity="0.65">resolve</text>
-      <text x="276" y="154" fill="currentColor" font-size="8" stroke="none" opacity="0.7">gates</text>
+      <text x="268" y="154" fill="currentColor" font-size="8" stroke="none" opacity="0.85">validation gates</text>
       <text x="400" y="154" fill="currentColor" font-size="8" stroke="none" opacity="0.65">auth</text>
       <text x="504" y="154" fill="currentColor" font-size="8" stroke="none" opacity="0.65">instruction</text>
-      <path d="M132 148 H148 M240 148 H252 M372 148 H388 M476 148 H492" stroke-opacity="0.25" marker-end="url(#arrow)"/>
+      <path d="M132 148 H148 M240 148 H252 M372 148 H388 M476 148 H492" stroke-opacity="0.3" marker-end="url(#arrow)"/>
+      <path d="M592 168 C640 200 700 210 740 220" stroke-opacity="0.22" stroke-dasharray="5 6"/>
+      <text x="620" y="208" fill="currentColor" font-size="8" stroke="none" opacity="0.45">recovery branch</text>
       <rect x="24" y="200" width="752" height="48" rx="8" stroke-opacity="0.12" stroke-dasharray="4 6"/>
-      <text x="40" y="230" fill="currentColor" font-size="8" stroke="none" opacity="0.45">agent.json · session · observability</text>
-      <path d="M400 184 V200" stroke-opacity="0.15" stroke-dasharray="3 5"/>
+      <text x="40" y="230" fill="currentColor" font-size="8" stroke="none" opacity="0.45">data plane · agent.json · telemetry</text>
+      <path d="M312 168 V200" stroke-opacity="0.35"/>
+      <text x="318" y="192" fill="currentColor" font-size="7" stroke="none" opacity="0.5">critical path</text>
     `;
   }
 
@@ -80,7 +84,17 @@ function compactTopology(slug: string): string {
 }
 
 export function getFlagshipDiagram(slug: string): DiagramSpec {
-  return wrapSvg(compactTopology(slug), "0 0 800 260", "Production topology — simplified");
+  const captions: Record<string, string> = {
+    nina: "Critical path through validation gates; dashed line is the recovery branch after selector failure.",
+    vision: "Ingest and agent orchestration must pass schema validation before the shot board is canonical.",
+    tax: "Agents feed validation topology; e-filing handoff only after commit gate passes."
+  };
+  const kind = slugKind(slug);
+  return wrapSvg(
+    compactTopology(slug),
+    "0 0 800 260",
+    captions[kind] ?? "Production topology"
+  );
 }
 
 /** @deprecated Use getFlagshipDiagram only on architecture section */

@@ -1,38 +1,51 @@
 import { RichText } from "@/components/case-study/RichText";
-import type { DecisionItem, EngineeringDepthItem, MetricItem, TradeoffItem } from "@/lib/case-study/types";
+import type { DecisionItem, EngineeringDepthItem, MetricItem, PostSectionTexture, TradeoffItem } from "@/lib/case-study/types";
 
+import { EvidenceStrip, InlineArtifact, MicroFlow, SectionTransition } from "./EngineeringTexture";
+import { PullQuote } from "./PullQuote";
 import { ReportEditorialSection } from "./ReportEditorialSection";
 
-export function ReportMechanics({ items }: { items: EngineeringDepthItem[] }) {
+export function ReportMechanics({
+  items,
+  texture
+}: {
+  items: EngineeringDepthItem[];
+  texture?: PostSectionTexture;
+}) {
   if (!items.length) return null;
 
-  const body = items
-    .map((item) => {
-      const detail = item.detail ? ` ${item.detail}` : "";
-      return `**${item.title}** — ${item.summary}${detail}`;
-    })
-    .join("\n\n");
+  const body = items.map((item) => `### ${item.title}\n\n${item.summary}`).join("\n\n");
 
   return (
     <ReportEditorialSection eyebrow="04 · Operations" title="Operational mechanics" id="mechanics">
+      {texture?.transition ? <SectionTransition>{texture.transition}</SectionTransition> : null}
+      {texture?.pullQuote ? <PullQuote className="mb-10">{texture.pullQuote}</PullQuote> : null}
+      {texture?.microFlow ? <MicroFlow steps={texture.microFlow} vertical /> : null}
       <RichText markdown={body} className="report-prose" />
+      {texture?.artifacts?.map((a) => (
+        <InlineArtifact key={a.label} artifact={a} />
+      ))}
+      {texture?.evidence?.length ? <EvidenceStrip lines={texture.evidence} /> : null}
     </ReportEditorialSection>
   );
 }
 
-export function ReportTradeoffs({ items, decisions }: { items: TradeoffItem[]; decisions?: DecisionItem[] }) {
+export function ReportTradeoffs({
+  items,
+  decisions,
+  texture
+}: {
+  items: TradeoffItem[];
+  decisions?: DecisionItem[];
+  texture?: PostSectionTexture;
+}) {
   if (!items.length && !decisions?.length) return null;
 
   const parts: string[] = [];
 
   if (decisions?.length) {
     for (const d of decisions) {
-      let block = `### ${d.title}\n\n${d.rationaleMarkdown}`;
-      if (d.alternativesMarkdown) block += `\n\n${d.alternativesMarkdown}`;
-      if (d.codeBlock) {
-        block += `\n\n\`\`\`${d.codeBlock.language ?? ""}\n${d.codeBlock.content}\n\`\`\``;
-      }
-      parts.push(block);
+      parts.push(`### ${d.title}\n\n${d.rationaleMarkdown}`);
     }
   }
 
@@ -42,7 +55,9 @@ export function ReportTradeoffs({ items, decisions }: { items: TradeoffItem[]; d
 
   return (
     <ReportEditorialSection eyebrow="05 · Tradeoffs" title="Explicit compromises" id="tradeoffs">
+      {texture?.transition ? <SectionTransition>{texture.transition}</SectionTransition> : null}
       <RichText markdown={parts.join("\n\n")} className="report-prose" />
+      {texture?.evidence?.length ? <EvidenceStrip lines={texture.evidence} /> : null}
     </ReportEditorialSection>
   );
 }

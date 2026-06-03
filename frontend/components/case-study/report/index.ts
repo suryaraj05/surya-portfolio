@@ -5,3 +5,4 @@ export * from "./ReportSupportingSections";
 export * from "./ReportContinueReading";
 export * from "./ReportProjectNav";
 export * from "./CompactDiagram";
+export * from "./EngineeringTexture";

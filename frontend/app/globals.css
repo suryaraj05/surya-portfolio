@@ -133,6 +133,14 @@ body {
   }
 
   .report-compact-diagram svg {
-    @apply h-auto w-full max-h-[220px];
+    @apply h-auto w-full max-h-[200px];
+  }
+
+  .report-prose h3:first-of-type {
+    @apply mt-0;
+  }
+
+  .report-transition + .report-pull-quote {
+    @apply mt-0;
   }
 }

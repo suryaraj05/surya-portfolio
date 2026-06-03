@@ -49,9 +49,9 @@ export function CaseStudyDocument({
         <ReportNarrativeSection key={section.id} section={section} />
       ))}
 
-      <ReportMechanics items={report.engineeringDepth} />
+      <ReportMechanics items={report.engineeringDepth} texture={report.mechanicsTexture} />
 
-      <ReportTradeoffs items={report.tradeoffs} decisions={report.decisions} />
+      <ReportTradeoffs items={report.tradeoffs} decisions={report.decisions} texture={report.tradeoffsTexture} />
 
       <ReportResults metrics={report.outcomeMetrics} />
 

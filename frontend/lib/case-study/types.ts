@@ -127,12 +127,36 @@ export type MicroNote = {
   value: string;
 };
 
+export type EngineeringArtifact = {
+  label: string;
+  content: string;
+  language?: string;
+};
+
+export type EvidenceLine = {
+  text: string;
+};
+
+export type PostSectionTexture = {
+  transition?: string;
+  pullQuote?: string;
+  microFlow?: string[];
+  artifacts?: EngineeringArtifact[];
+  evidence?: EvidenceLine[];
+};
+
 export type NarrativeSectionSpec = {
   id: string;
   eyebrow?: string;
   title: string;
   markdown: string;
   pullQuote?: string;
+  pullQuoteAfter?: string;
+  transition?: string;
+  microFlow?: string[];
+  artifacts?: EngineeringArtifact[];
+  evidence?: EvidenceLine[];
+  diagramNotes?: string[];
   payloads?: PayloadBlock[];
   callouts?: ArchitectureCallout[];
   diagram?: DiagramSpec;
@@ -158,5 +182,7 @@ export type CaseStudyReport = {
   techStack: TechItem[];
   outcomeMetrics: MetricItem[];
   lessonsMarkdown?: string;
+  mechanicsTexture?: PostSectionTexture;
+  tradeoffsTexture?: PostSectionTexture;
 };
 

@@ -44,6 +44,7 @@ function enrichSection(project: ProjectDTO, section: NarrativeSectionSpec): Narr
     fullWidthDiagram: undefined,
     diagram,
     payloads: section.id === "response" || section.id === "insight" ? section.payloads?.slice(0, 1) : undefined
+    // preserve transition, microFlow, artifacts, evidence, diagramNotes, pullQuoteAfter from enrichment
   };
 }
 
@@ -121,6 +122,8 @@ export function resolveCaseStudyReport(
     tradeoffs,
     techStack: mapTechStack(project, content),
     outcomeMetrics,
-    lessonsMarkdown: content?.lessonsMarkdown
+    lessonsMarkdown: content?.lessonsMarkdown,
+    mechanicsTexture: enrichment?.mechanicsTexture,
+    tradeoffsTexture: enrichment?.tradeoffsTexture
   };
 }
