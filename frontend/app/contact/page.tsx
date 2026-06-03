@@ -20,7 +20,8 @@ export default async function ContactPage() {
   const settings = (await fetchSettings()).data;
 
   const email = (settings.email as string | undefined) ?? undefined;
-  const linkedinUrl = (settings.linkedin_url as string | undefined) ?? undefined;
+  const linkedinUrl =
+    (settings.linkedin_url as string | undefined) ?? "https://www.linkedin.com/in/salve-surya-raj/";
   const githubUrl = (settings.github_url as string | undefined) ?? undefined;
   const resumeUrl = (settings.resume_url as string | undefined) ?? undefined;
 

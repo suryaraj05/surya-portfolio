@@ -114,4 +114,37 @@ body {
   .link-premium:hover {
     @apply translate-x-0.5 text-foreground;
   }
+
+  /* Engineering case study report (project detail only) */
+  .case-study-report .report-hero {
+    @apply pb-0;
+  }
+
+  .report-dark-band {
+    @apply bg-[hsl(222,28%,7%)] text-white;
+  }
+
+  .report-prose p {
+    @apply mb-5 leading-[1.75] text-foreground/90;
+  }
+
+  .report-prose-invert p {
+    @apply text-white/75;
+  }
+
+  .report-pull-quote {
+    @apply border-l-2 border-foreground/20 py-1 pl-5;
+  }
+
+  .report-dark-band .report-pull-quote {
+    @apply border-white/25;
+  }
+
+  .report-dark-band .report-pull-quote blockquote {
+    @apply text-white/90;
+  }
+
+  .report-section + .report-section {
+    @apply scroll-mt-20;
+  }
 }

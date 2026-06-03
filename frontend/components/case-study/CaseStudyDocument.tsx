@@ -1,22 +1,24 @@
 import type { ProjectDTO } from "@/src/contracts/types";
-import type {
-  CaseStudyContent,
-  MediaGallerySpec,
-  MetricItem,
-  ProjectNavItem,
-  TechItem,
-  TradeoffItem
-} from "@/lib/case-study/types";
+import type { CaseStudyContent, ProjectNavItem } from "@/lib/case-study/types";
 
-import { CaseStudyHero } from "@/components/case-study/CaseStudyHero";
-import { ProblemSection, ChallengeSection, TradeoffSection, MetricsSection, LessonsLearned } from "@/components/case-study/CaseStudySections";
-import { ArchitectureSection } from "@/components/case-study/ArchitectureSection";
-import { DecisionSection } from "@/components/case-study/DecisionSection";
-import { TechStackSection } from "@/components/case-study/TechStackSection";
 import { MediaGallery } from "@/components/case-study/MediaGallery";
 import { RelatedProjects } from "@/components/case-study/RelatedProjects";
 import { ProjectNavigation } from "@/components/case-study/ProjectNavigation";
-import { Stack } from "@/components/layout/stack";
+import {
+  CaseStudyReportHero,
+  EngineeringDepthBand,
+  ReportNarrativeSection
+} from "@/components/case-study/report";
+import {
+  OrchestrationVisual,
+  ReportDecisions,
+  ReportLessons,
+  ReportOutcomeMetrics,
+  ReportTechStack,
+  ReportTradeoffs
+} from "@/components/case-study/report/ReportSupportingSections";
+import { resolveCaseStudyReport } from "@/lib/case-study/resolve-report";
+import { getSystemMetrics } from "@/lib/project-metrics";
 
 type CaseStudyDocumentProps = {
   project: ProjectDTO;
@@ -26,16 +28,7 @@ type CaseStudyDocumentProps = {
   nextProject?: ProjectNavItem;
 };
 
-function hasMarkdown(markdown?: string | null): markdown is string {
-  return Boolean(markdown && markdown.trim().length > 0);
-}
-
-function mapTechStack(project: ProjectDTO, content?: Partial<CaseStudyContent>): TechItem[] {
-  if (content?.techStack?.length) return content.techStack;
-  return (project.tech_stack ?? []).map((name) => ({ name }));
-}
-
-function mapMedia(project: ProjectDTO, content?: Partial<CaseStudyContent>): MediaGallerySpec | null {
+function mapMedia(project: ProjectDTO, content?: Partial<CaseStudyContent>) {
   if (content?.media) return content.media;
 
   const images = [
@@ -50,18 +43,8 @@ function mapMedia(project: ProjectDTO, content?: Partial<CaseStudyContent>): Med
   return { images };
 }
 
-function mapMetrics(content?: Partial<CaseStudyContent>): MetricItem[] {
-  return content?.metrics ?? [];
-}
-
-function mapTradeoffs(content?: Partial<CaseStudyContent>): TradeoffItem[] {
-  return content?.tradeoffs ?? [];
-}
-
 /**
- * CaseStudyDocument
- * Final composition layer for rendering an engineering case study from ProjectDTO + optional CMS enrichments.
- * Server component safe: no client hooks, no browser-only APIs.
+ * Premium engineering report layout for project detail pages only.
  */
 export function CaseStudyDocument({
   project,
@@ -70,56 +53,63 @@ export function CaseStudyDocument({
   previousProject,
   nextProject
 }: CaseStudyDocumentProps) {
-  const problemMarkdown = content?.problemMarkdown ?? project.problem ?? "";
-  const challengeMarkdown = content?.challengeMarkdown ?? project.solution ?? "";
-  const architectureMarkdown = content?.architectureMarkdown ?? project.architecture ?? "";
-  const decisions = content?.decisions ?? [];
-  const tradeoffs = mapTradeoffs(content);
-  const tech = mapTechStack(project, content);
-  const metrics = mapMetrics(content);
+  const report = resolveCaseStudyReport(project, content);
+  const systemProfile = getSystemMetrics(project.slug, project.tech_stack ?? []);
   const media = mapMedia(project, content);
-  const lessonsMarkdown = content?.lessonsMarkdown ?? "";
 
   return (
-    <Stack size="lg" className="w-full">
-      <CaseStudyHero
-        title={project.title}
-        subtitle={content?.hero?.subtitle ?? project.short_description ?? undefined}
-        kicker={content?.hero?.kicker}
-        coverDescriptionMarkdown={content?.hero?.coverDescriptionMarkdown ?? undefined}
+    <article className="case-study-report w-full animate-fade-in motion-reduce:animate-none">
+      <CaseStudyReportHero
+        title={report.hero.title}
+        subtitle={report.hero.subtitle}
+        narrativeIntro={report.hero.narrativeIntro}
+        kicker={report.hero.kicker}
+        systemProfile={systemProfile}
+        heroDiagram={report.heroDiagram}
       />
 
-      {hasMarkdown(problemMarkdown) ? <ProblemSection markdown={problemMarkdown} /> : null}
+      {report.sections.map((section, index) => (
+        <ReportNarrativeSection key={section.id} section={section} index={index} />
+      ))}
 
-      {hasMarkdown(challengeMarkdown) ? <ChallengeSection markdown={challengeMarkdown} /> : null}
-
-      {hasMarkdown(architectureMarkdown) || (content?.architectureDiagrams?.length ?? 0) > 0 ? (
-        <ArchitectureSection
-          markdown={architectureMarkdown}
-          diagrams={content?.architectureDiagrams}
-        />
+      {report.orchestrationCaption &&
+      !report.sections.some((s) => s.layout === "diagram-first") ? (
+        <OrchestrationVisual slug={report.slug} caption={report.orchestrationCaption} />
       ) : null}
 
-      {decisions.length ? <DecisionSection decisions={decisions} /> : null}
+      <EngineeringDepthBand items={report.engineeringDepth} />
 
-      {tradeoffs.length ? <TradeoffSection items={tradeoffs} /> : null}
+      <ReportDecisions decisions={report.decisions} />
 
-      {tech.length ? <TechStackSection tech={tech} /> : null}
+      <ReportTradeoffs items={report.tradeoffs} />
 
-      {metrics.length ? <MetricsSection metrics={metrics} /> : null}
+      <ReportTechStack tech={report.techStack} />
 
-      {media ? <MediaGallery spec={media} /> : null}
+      <ReportOutcomeMetrics metrics={report.outcomeMetrics} />
 
-      {hasMarkdown(lessonsMarkdown) ? <LessonsLearned markdown={lessonsMarkdown} /> : null}
+      {media ? (
+        <section className="report-section py-section-tight">
+          <div className="mx-auto w-full max-w-layout px-content-x">
+            <MediaGallery spec={media} />
+          </div>
+        </section>
+      ) : null}
+
+      {content?.lessonsMarkdown || report.lessonsMarkdown ? (
+        <ReportLessons markdown={content?.lessonsMarkdown ?? report.lessonsMarkdown ?? ""} />
+      ) : null}
 
       {relatedProjects?.length ? (
-        <RelatedProjects projects={relatedProjects} currentSlug={project.slug} />
+        <div className="report-section border-t border-border/60 py-section-tight">
+          <RelatedProjects projects={relatedProjects} currentSlug={project.slug} />
+        </div>
       ) : null}
 
       {previousProject || nextProject ? (
-        <ProjectNavigation previous={previousProject} next={nextProject} />
+        <div className="border-t border-border/60">
+          <ProjectNavigation previous={previousProject} next={nextProject} />
+        </div>
       ) : null}
-    </Stack>
+    </article>
   );
 }
-

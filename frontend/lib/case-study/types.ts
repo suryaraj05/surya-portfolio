@@ -92,3 +92,55 @@ export type CaseStudyContent = {
   lessonsMarkdown?: string;
 };
 
+export type PayloadBlock = {
+  title: string;
+  language: string;
+  content: string;
+  caption?: string;
+};
+
+export type ArchitectureCallout = {
+  title: string;
+  body: string;
+  tag?: string;
+};
+
+export type EngineeringDepthItem = {
+  title: string;
+  summary: string;
+  detail?: string;
+};
+
+export type NarrativeSectionSpec = {
+  id: string;
+  eyebrow?: string;
+  title: string;
+  markdown: string;
+  pullQuote?: string;
+  payloads?: PayloadBlock[];
+  callouts?: ArchitectureCallout[];
+  diagram?: DiagramSpec;
+  fullWidthDiagram?: DiagramSpec;
+  tone?: "light" | "dark";
+  layout?: "prose" | "split" | "diagram-first";
+};
+
+export type CaseStudyReport = {
+  slug: string;
+  hero: {
+    title: string;
+    subtitle?: string;
+    kicker?: CaseStudyKicker[];
+    narrativeIntro: string;
+  };
+  heroDiagram?: DiagramSpec;
+  sections: NarrativeSectionSpec[];
+  engineeringDepth: EngineeringDepthItem[];
+  orchestrationCaption?: string;
+  decisions: DecisionItem[];
+  tradeoffs: TradeoffItem[];
+  techStack: TechItem[];
+  outcomeMetrics: MetricItem[];
+  lessonsMarkdown?: string;
+};
+

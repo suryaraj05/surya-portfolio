@@ -71,7 +71,7 @@ def run_seed() -> None:
                     site_title="SuryaOS",
                     site_description="Personal platform",
                     github_url="https://github.com/surya",
-                    linkedin_url="https://linkedin.com/in/surya",
+                    linkedin_url="https://www.linkedin.com/in/salve-surya-raj/",
                     social_links={"x": "https://x.com/surya"},
                 )
             )
